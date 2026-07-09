@@ -78,28 +78,4 @@ Booker, M. (2026). *CompTIA A+ Core 1201 full practice exam and study platform* 
 
 ---
 
-## For the Instructor
-
-The tool is a single self-contained HTML file with zero external dependencies — no CDN calls, no external images, no localStorage. All four modes (practice, study guide, visual reference, interactive) live in one file and toggle via `switchMode()`. Each domain's question array (`MOBILE`, `NETWORKING`, `HARDWARE`, `VIRTUALIZATION`, `TROUBLESHOOTING`) follows the shared object schema:
-
-```javascript
-{
-  objective: '1.1',      // CompTIA sub-objective ID
-  topic: 'String',       // topic label for grouping
-  diff: 'found|inter|adv',
-  stem: 'Question text (use backtick spans for `code`)',
-  opts: ['A','B','C','D'],
-  ans: 0,                // zero-indexed correct answer
-  rationale: '<strong>...</strong> explanation',
-  misconception: 'Common student error'
-}
-```
-
-A validation pass runs automatically at page load (see the `validate()` function) confirming every question has exactly 4 options, an in-bounds answer index, and all required fields. To further extend the question bank beyond 250, append new objects to the relevant domain array in the same shape — no other code changes are required.
-
-To update content, edit the HTML file directly and push to `main`. GitHub Pages rebuilds automatically within 1–2 minutes.
-
----
-
-*CompTIA A+ Core 1201 · Practice platform maintained by Dr. Mario Booker · mario.booker@wgu.edu*
 
