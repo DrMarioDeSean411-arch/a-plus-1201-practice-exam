@@ -134,7 +134,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <div class="top-bar">
   <div class="top-title">CompTIA A+ Core 1201 — Full Practice Exam &amp; Study Platform</div>
-  <div class="top-sub">250 practice questions · 5-domain study guide · original SVG references · 5 interactive tools</div>
+  <div class="top-sub">250 practice questions · 120 performance-based simulations · 5-domain study guide · original SVG references · 5 interactive tools</div>
   <div class="top-pills">
     <span class="pill p-mobile">Mobile Devices 14%</span>
     <span class="pill p-net">Networking 20%</span>
@@ -174,6 +174,36 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
+<div id="simulations-view" style="display:none">
+  <div class="top-sub" style="margin:-4px 0 14px;color:#6b6b67;font-size:13px">Performance-based scenario items: field-technician judgment calls, multi-symptom diagnosis, and "which step comes next" sequencing — a different muscle than the conceptual recall in Practice Questions.</div>
+  <div class="scr-grid">
+    <div class="scr-card"><div class="scr-num" id="sim-sc-tot">0<span style="font-size:13px;color:#9b9b97">/0</span></div><div class="scr-lbl">Answered</div></div>
+    <div class="scr-card"><div class="scr-num" id="sim-sc-right" style="color:#1D9E75">0</div><div class="scr-lbl">Correct</div></div>
+    <div class="scr-card"><div class="scr-num" id="sim-sc-wrong" style="color:#A32D2D">0</div><div class="scr-lbl">Incorrect</div></div>
+    <div class="scr-card"><div class="scr-num" id="sim-sc-pct">—</div><div class="scr-lbl">Overall score</div></div>
+    <div class="scr-card"><div class="scr-num" id="sim-sc-pass" style="color:#9b9b97">—</div><div class="scr-lbl">Exam ready?</div></div>
+  </div>
+  <div class="prog-wrap"><div class="prog-bar" id="sim-prog" style="width:0%"></div></div>
+  <div class="prog-lbl"><span id="sim-prog-txt">0 of 0 answered</span><span id="sim-pass-note" style="color:#1D9E75;font-weight:500"></span></div>
+
+  <div class="sec-label">Select domain</div>
+  <div class="sec-row" id="sim-sec-row"></div>
+  <div class="sum-grid" id="sim-sum-grid"></div>
+
+  <div class="sec-label" id="sim-q-label">Simulations</div>
+  <div class="tab-row" id="sim-tabs"></div>
+  <div id="sim-qview"></div>
+  <div class="nav-row">
+    <button class="nav-btn" onclick="goSim(-1)">&#8592; Prev</button>
+    <button class="nav-btn" onclick="goSim(1)">Next &#8594;</button>
+  </div>
+
+  <div class="breakdown">
+    <div class="bd-title">Domain &amp; difficulty breakdown</div>
+    <div id="sim-bd-rows"></div>
+  </div>
+</div>
+
 <div id="guide-view" style="display:none">
   <div id="guide-container"></div>
 </div>
@@ -193,6 +223,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 // ═══════════════════════════════════════════════════════════════════
 const MODES=[
   {key:'practice', label:'Practice Questions'},
+  {key:'simulations', label:'Simulations'},
   {key:'guide', label:'Domain Study Guide'},
   {key:'visual', label:'Visual Reference'},
   {key:'interactive', label:'Interactive Foundations'}
@@ -214,12 +245,14 @@ function switchMode(key){
   curMode=key;
   buildModeRow();
   document.getElementById('practice-view').style.display=key==='practice'?'block':'none';
+  document.getElementById('simulations-view').style.display=key==='simulations'?'block':'none';
   document.getElementById('guide-view').style.display=key==='guide'?'block':'none';
   document.getElementById('visual-view').style.display=key==='visual'?'block':'none';
   document.getElementById('interactive-view').style.display=key==='interactive'?'block':'none';
   if(key==='guide' && !window._guideBuilt){ buildGuide(); window._guideBuilt=true; }
   if(key==='visual' && !window._visualBuilt){ buildVisuals(); window._visualBuilt=true; }
   if(key==='interactive' && !window._interactiveBuilt){ buildInteractive(); window._interactiveBuilt=true; }
+  if(key==='simulations' && !window._simulationsBuilt){ renderSim(); window._simulationsBuilt=true; }
 }
 buildModeRow();
 </script>
@@ -2011,6 +2044,871 @@ misconception:'Students sometimes assume toner and drum replacement covers all p
 
 <script>
 // ═══════════════════════════════════════════════════════════════════
+// SIMULATIONS — performance-based scenario items (120 total, 5 domains)
+// Original scenario writing. Tech-in-the-field voice: a symptom set,
+// a sequence of steps already taken, and a judgment call about what
+// comes next — closer to the performance-based item style CompTIA
+// uses than to the conceptual-recall items in Practice Questions.
+// ═══════════════════════════════════════════════════════════════════
+
+// --- SIM DOMAIN 1: MOBILE DEVICES (17) ---
+const SIM_MOBILE=[
+{objective:'1.1',topic:'Laptop Hardware',diff:'found',
+stem:'A technician is about to replace a laptop\'s keyboard. The laptop has a user-removable battery held in by two latches on the bottom panel. What is the correct first step?',
+opts:['Remove the keyboard retaining screws immediately','Slide the battery latches and remove the battery before touching any internal component','Plug the laptop into AC power for a stable work environment','Boot into the BIOS to disable the keyboard controller'],
+ans:1,
+rationale:'<strong>B is correct.</strong> With a user-removable battery present, pulling it (in addition to unplugging AC power) is the correct first physical-safety step before any internal work, eliminating a live power source entirely rather than just reducing it.',
+misconception:'Technicians sometimes only unplug AC power and forget a removable battery is still a live power source sitting inside the chassis they are about to open.'},
+
+{objective:'1.1',topic:'Laptop Displays',diff:'inter',
+stem:'A technician replaces a cracked laptop screen with a new panel of the same model number. After reassembly, the image displays but colors look washed out compared to the old panel, and the technician confirms the video cable is fully seated. What should be checked next?',
+opts:['The laptop\'s Wi-Fi driver','Whether the replacement panel is the same underlying technology (e.g., a TN panel substituted for the original IPS) despite sharing a model number','The keyboard backlight','The battery health percentage'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Aftermarket replacement panels sold under a compatible model number sometimes swap the underlying display technology; an IPS-to-TN substitution is a common, well-documented cause of washed-out color and poor viewing angles after an otherwise correct physical repair.',
+misconception:'Technicians assume a matching model number guarantees matching panel technology, when compatible part numbers often cover several different underlying panel types sourced by the reseller.'},
+
+{objective:'1.2',topic:'Mobile Device Types',diff:'found',
+stem:'A warehouse is choosing a handheld scanner that will be dropped onto a concrete floor regularly and used in a refrigerated storage area. Which spec should the technician prioritize above raw performance figures?',
+opts:['Screen refresh rate','IP rating and operating temperature range','Number of home screen widgets supported','Bluetooth codec supported'],
+ans:1,
+rationale:'<strong>B is correct.</strong> A device\'s IP rating (drop/dust/water resistance) and its rated operating temperature range directly determine whether it survives the stated environment; performance specs like refresh rate are irrelevant if the unit fails from cold or impact.',
+misconception:'Technicians default to comparing performance specs across devices without first filtering for the environmental ratings that determine whether the device survives the deployment at all.'},
+
+{objective:'1.3',topic:'Mobile Connectors',diff:'inter',
+stem:'A user\'s USB-C phone charges normally but a USB-C-to-HDMI adapter that worked on a coworker\'s identical phone model shows no video on this one. Both phones run the same OS version. What is the most likely explanation?',
+opts:['The adapter is defective in every case','This specific phone\'s USB-C port is wired for power and data only, without the Alt Mode lines needed for video, despite sharing a model number with the coworker\'s unit','The HDMI cable is the wrong resolution','The phone needs a factory reset'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Carrier or regional variants of the same phone model sometimes differ in which signal lines are wired to the USB-C port; a unit missing DisplayPort Alt Mode wiring will never output video through that port regardless of adapter quality, even though an apparently identical phone does.',
+misconception:'Technicians assume two phones that look identical and share a model number must be electrically identical, overlooking carrier/region variants that differ in which USB-C signal lines are actually wired through.'},
+
+{objective:'1.4',topic:'Mobile OS Configuration',diff:'inter',
+stem:'A technician enrolls a company tablet in MDM. Afterward, the tablet can install apps from the corporate catalog but the user reports the public app store icon has disappeared entirely. What most likely explains this?',
+opts:['The tablet\'s storage is full','The MDM profile applied an app-store restriction policy as part of corporate enrollment, which is a deliberate policy outcome, not a malfunction','The Wi-Fi connection dropped','The tablet needs an OS update before the store icon reappears'],
+ans:1,
+rationale:'<strong>B is correct.</strong> MDM profiles commonly include a policy that hides or disables the public app store on corporate-owned devices to restrict installs to an approved catalog; a disappeared store icon right after enrollment is the expected result of that policy, not a bug to troubleshoot as a fault.',
+misconception:'Technicians treat a missing app store icon as a symptom to fix rather than recognizing it as an intended consequence of the MDM policy that was just applied.'},
+
+{objective:'1.5',topic:'Email Configuration',diff:'adv',
+stem:'A user\'s phone was configured for corporate email using Exchange ActiveSync. After a password reset, the phone keeps prompting for credentials even though the new password is confirmed correct when tested on a laptop. What should the technician do?',
+opts:['Reinstall the phone\'s OS from scratch','Remove and re-add the email account on the phone so it re-negotiates authentication with the new password, since EAS profiles can cache the old credential hash locally','Replace the SIM card','Factory reset the Exchange server'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Exchange ActiveSync profiles on mobile devices can continue retrying a cached credential hash after a server-side password reset; removing and re-adding the account forces the device to re-authenticate with the current password rather than replay a stale one.',
+misconception:'Technicians assume that because the new password works elsewhere, the phone\'s account profile must already be using it, missing that the device-side profile can still be holding onto the prior credential.'},
+
+{objective:'1.6',topic:'Mobile Connectivity',diff:'found',
+stem:'A technician is asked to let a laptop share a phone\'s cellular connection over a direct USB cable rather than Wi-Fi, to avoid draining the phone\'s battery as fast. What should be enabled on the phone?',
+opts:['Airplane mode','USB tethering','NFC','Wi-Fi Calling'],
+ans:1,
+rationale:'<strong>B is correct.</strong> USB tethering shares the phone\'s cellular data connection over the physical USB cable, which also charges the phone while in use, avoiding the additional battery drain that broadcasting a Wi-Fi hotspot would add.',
+misconception:'Technicians default to Wi-Fi hotspot as the only tethering method, overlooking that USB tethering serves the same purpose with a lower power cost to the phone.'},
+
+{objective:'1.7',topic:'Mobile Security',diff:'inter',
+stem:'A company-owned phone is reported lost. The help desk confirms in the MDM console that a remote wipe command was issued three hours ago, but the device still has not reported back as wiped. What is the most likely reason?',
+opts:['The remote wipe feature only works on company Wi-Fi','The device has had no network connectivity since the command was issued, so it cannot yet receive and execute the command','MDM remote wipe commands expire after one hour','The device\'s battery is permanently drained by the wipe command itself'],
+ans:1,
+rationale:'<strong>B is correct.</strong> A remote wipe command sits queued at the MDM server until the device checks in over any network connection; a device that is powered off, in airplane mode, or simply out of signal will not execute the command until it reconnects, which explains the delay without indicating a failure of the command itself.',
+misconception:'Technicians assume a remote command executes instantly everywhere, without accounting for the dependency on the target device actually having network connectivity to receive it.'},
+
+{objective:'1.2',topic:'Wearables',diff:'adv',
+stem:'An employee\'s cellular-enabled smartwatch can make calls when near their paired phone but drops to Wi-Fi-only functionality once they leave the building, even though the watch shows an active LTE provisioning. What should be verified first?',
+opts:['The watch\'s screen brightness setting','Whether the watch\'s number-share/companion plan with the carrier is still active, since LTE smartwatches often require an ongoing linked subscription separate from simply having a SIM profile provisioned','The watch\'s Bluetooth pairing history','The phone\'s screen lock timeout'],
+ans:1,
+rationale:'<strong>B is correct.</strong> LTE smartwatches typically rely on a carrier\'s number-share plan remaining active in addition to the initial eSIM provisioning; a lapsed or suspended companion plan can leave the provisioning visibly present on the watch while independent cellular functionality silently stops working away from the phone.',
+misconception:'Technicians treat "provisioning shows active" as proof the cellular plan itself is still billed and active, missing that the two can become out of sync without any visible error on the device.'},
+
+{objective:'1.1',topic:'Laptop Hardware',diff:'adv',
+stem:'A laptop that previously ran cool now idles hot and the fan runs constantly, even right after a fresh OS reinstall with no background applications running. The vents are visibly clear of dust. What should the technician check next?',
+opts:['The laptop\'s keyboard layout settings','Whether the fan curve or thermal profile in the BIOS/UEFI was reset to a more aggressive default during the reinstall process, or whether a stuck BIOS-level sensor is reporting a false high reading','The Wi-Fi adapter\'s driver version','The webcam privacy shutter'],
+ans:1,
+rationale:'<strong>B is correct.</strong> With dust ruled out and no software load to explain the heat, the next reasonable layer to check is firmware-level: a BIOS/UEFI fan curve reset to a more conservative (noisier) default, or a sensor reporting an inaccurate reading, both of which can produce constant fan operation independent of actual thermal load.',
+misconception:'Technicians assume dust and software load are the only two possible explanations for fan/heat symptoms, overlooking firmware-level fan curve and sensor behavior as a distinct third layer to check.'},
+
+{objective:'1.3',topic:'Mobile Connectors',diff:'found',
+stem:'A technician needs to give a user with a USB-C laptop a single cable solution to power the laptop, connect it to a wired network, and drive an external monitor simultaneously. What should the technician provide?',
+opts:['A USB-C to 3.5mm adapter','A USB-C docking adapter (dock) with Power Delivery passthrough, Ethernet, and video output','A USB-A extension cable','A Lightning to HDMI adapter'],
+ans:1,
+rationale:'<strong>B is correct.</strong> A USB-C dock that supports Power Delivery passthrough alongside Ethernet and video breakout satisfies all three stated needs through the single USB-C port, which is exactly the problem this category of accessory is built to solve.',
+misconception:'Technicians sometimes reach for single-purpose adapters and try to stack several of them on one port, rather than recognizing a multiport dock solves the complete requirement in one accessory.'},
+
+{objective:'1.4',topic:'Mobile OS Configuration',diff:'found',
+stem:'A technician needs a corporate Android tablet to automatically silence all notifications and lock the home screen to a single approved app during a kiosk-style public demo. What feature accomplishes this?',
+opts:['Airplane mode','Single-app (kiosk) mode, typically configured through MDM or a built-in OS pinning feature','Battery saver mode','Developer options'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Kiosk/single-app mode locks the device to one designated app and suppresses the rest of the OS interface, which is exactly the locked-down, single-purpose behavior a public demo device needs, and is typically configured through MDM policy or a native app-pinning feature.',
+misconception:'Technicians think of Airplane mode or Do Not Disturb as sufficient lockdown, missing that neither prevents a user from leaving the demo app or reaching other parts of the OS.'},
+
+{objective:'1.5',topic:'Email Configuration',diff:'inter',
+stem:'A user configuring a personal email account on their phone selects IMAP, but after a week notices that deleting an email on the phone does not remove it from their laptop\'s mail client. What setting should be checked?',
+opts:['The phone\'s screen timeout setting','Whether both devices are configured to sync the same IMAP folder/mailbox path and whether "delete" is mapped to move-to-trash versus a local-only delete on one of the clients','The phone\'s Bluetooth settings','The laptop\'s antivirus software'],
+ans:1,
+rationale:'<strong>B is correct.</strong> IMAP synchronizes state across devices, but only if both clients are pointed at the same server-side mailbox/folder structure and both interpret "delete" the same way (moving to a Trash folder that syncs, versus a local-only removal); a mismatch in either produces exactly this symptom.',
+misconception:'Technicians treat "I set up IMAP" as sufficient to guarantee full synchronization, without checking that both clients agree on folder mapping and what a delete action actually does server-side.'},
+
+{objective:'1.6',topic:'Mobile Connectivity',diff:'inter',
+stem:'A technician is asked why a company tablet can browse the public internet over its cellular plan but cannot reach the internal intranet site that is reachable fine from the office Wi-Fi. What is the most likely explanation?',
+opts:['The tablet\'s cellular antenna is damaged','The intranet site lives on a private internal network not reachable from the public cellular carrier network without a VPN connection','The tablet needs a SIM card reinsertion','The tablet\'s battery is too low to maintain two connections'],
+ans:1,
+rationale:'<strong>B is correct.</strong> A public cellular data path routes through the carrier\'s network to the open internet, but an internal intranet site sitting behind the company firewall on a private address space is not reachable from that public path unless a VPN tunnel bridges the device into the internal network.',
+misconception:'Technicians treat "has internet access" as a single uniform capability, missing that reaching a public site and reaching a private internal resource require entirely different network paths.'},
+
+{objective:'1.7',topic:'Mobile Security',diff:'found',
+stem:'A user\'s phone is set to require Face ID to unlock, but a coworker was able to read the content of an incoming text message by simply glancing at the locked screen when it buzzed. What setting addresses this specific exposure?',
+opts:['Disabling Face ID entirely and switching to a PIN','Changing the lock screen notification preview setting so message content is hidden until the device is unlocked','Turning off Wi-Fi','Enabling Airplane mode'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Lock screen notification previews display message content without requiring authentication; adjusting that specific setting (rather than the unlock method itself) closes the exposure, since the authentication mechanism was never the weak point here.',
+misconception:'Technicians assume any information leak on a locked phone must mean the lock itself is weak, rather than recognizing that notification preview settings operate independently of the authentication method.'},
+
+{objective:'1.2',topic:'Mobile Device Types',diff:'inter',
+stem:'A retail company wants a low-cost, always-powered device to run a single rotating promotional slideshow on a wall-mounted display, with no need for battery life or portability. Which device category best fits, and why would a flagship tablet be overkill?',
+opts:['A flagship smartphone, because its camera quality matters for the slideshow','A basic tablet or dedicated digital signage unit kept plugged in, since the premium battery/portability features of a flagship device are paid for but never used in this always-powered, stationary use case','A smartwatch, because it is the cheapest device available','A fitness tracker, because it has the longest battery life'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Since the device stays plugged in and stationary, paying for a flagship phone\'s battery engineering and portability features provides no benefit; a basic tablet or purpose-built signage unit meets the actual requirement at a lower cost.',
+misconception:'Technicians default to recommending the most capable device available rather than matching the device tier to what the stated use case will actually use.'},
+
+{objective:'1.1',topic:'Laptop Displays',diff:'found',
+stem:'A technician is asked to replace a cracked laptop lid but is told the laptop also has an embedded Wi-Fi antenna wire routed through the lid hinge. What must the technician do differently compared to a laptop without this feature?',
+opts:['Nothing differs; lid replacement is identical in both cases','Carefully disconnect and re-route the antenna cable through the hinge area during replacement, since damaging it will degrade or eliminate Wi-Fi reception even though the screen itself works fine afterward','Replace the motherboard at the same time as a precaution','Remove the battery permanently since it is unrelated to the lid'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Many laptops route the Wi-Fi antenna wire through the lid/hinge assembly; a lid replacement on this design requires carefully handling and reconnecting that antenna cable, since pinching or severing it produces a connectivity problem with no visible screen-related symptom at all.',
+misconception:'Technicians treat a lid swap as a purely cosmetic, screen-only repair, overlooking that some designs route functional wiring like the Wi-Fi antenna through the same assembly.'},
+];
+
+// --- SIM DOMAIN 2: NETWORKING (24) ---
+const SIM_NETWORKING=[
+{objective:'2.1',topic:'IP Addressing',diff:'found',
+stem:'Two workstations on the same switch were both manually assigned 192.168.1.50 by two different technicians on two different days. Both now report intermittent network drops. What is happening?',
+opts:['A DNS record conflict','An IP address conflict, since both devices are claiming the same address on the same subnet','A duplex mismatch','A failing switch port'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Two devices holding the identical static IP address on the same subnet will intermittently disrupt each other\'s connectivity as the network alternates which device\'s traffic actually reaches its destination — the textbook symptom of an IP address conflict.',
+misconception:'Technicians sometimes suspect switch or cabling hardware first, overlooking that an addressing conflict produces this exact intermittent, both-devices-affected symptom without any physical fault at all.'},
+
+{objective:'2.1',topic:'Subnetting',diff:'adv',
+stem:'A technician is told a point-to-point link between two routers needs exactly 2 usable host addresses with the least possible address waste. Which subnet mask should be assigned to that link?',
+opts:['/24','/30','/28','/16'],
+ans:1,
+rationale:'<strong>B is correct.</strong> A /30 mask yields 4 total addresses (network, 2 usable hosts, broadcast), which is the smallest block that still provides exactly the 2 usable addresses a point-to-point link needs, wasting the least address space.',
+misconception:'Technicians sometimes default to a larger, more "familiar" mask like /24 out of habit, without considering that a point-to-point link only ever needs 2 usable addresses.'},
+
+{objective:'2.2',topic:'Ports & Protocols',diff:'inter',
+stem:'A technician troubleshooting remote server management notices that port 23 is open on a Linux server, and a colleague suggests using it for command-line access. What should the technician recommend instead, and why?',
+opts:['Port 23 is fine; Telnet is a secure, modern replacement for SSH','Use port 22 (SSH) instead, since Telnet (port 23) transmits credentials and session data in plaintext, unlike SSH\'s encrypted channel','Use port 3389, since RDP works on Linux servers the same as Windows','Use port 80, since web ports are always more secure'],
+ans:1,
+rationale:'<strong>B is correct.</strong> SSH on port 22 provides an encrypted remote shell, while Telnet on port 23 sends everything — including login credentials — in plaintext; recommending SSH instead of continuing to use an open Telnet port addresses a real exposure, not just a preference.',
+misconception:'Technicians sometimes treat "a port is open and working" as equivalent to "a port is an acceptable choice," without weighing whether the protocol behind that port is secure for the task.'},
+
+{objective:'2.2',topic:'Ports & Protocols',diff:'found',
+stem:'A user reports that a specific internal website will not load in the browser, but pinging that same server\'s IP address succeeds. Which port/protocol should the technician check on that server first?',
+opts:['Port 53 (DNS)','Port 80/443 (HTTP/HTTPS), since the ping confirms basic connectivity but not that the web service itself is running or reachable','Port 25 (SMTP)','Port 161 (SNMP)'],
+ans:1,
+rationale:'<strong>B is correct.</strong> A successful ping confirms the host responds at the network layer, but says nothing about whether the web server process is actually running and listening on its HTTP/HTTPS port, which is the next thing to check when the site itself fails to load.',
+misconception:'Technicians treat a successful ping as proof that "the server is fine," without recognizing it only validates basic reachability, not that any specific service on that server is functioning.'},
+
+{objective:'2.3',topic:'Network Topologies',diff:'inter',
+stem:'In an office using a star topology with a central switch, one workstation\'s cable is accidentally cut by a cleaning crew. What is the correct expectation for the rest of the office?',
+opts:['The entire office loses connectivity','Only that one workstation loses connectivity; the rest of the star continues operating normally since each device has its own dedicated link to the switch','Half the office loses connectivity, split by which switch port range they are on','The switch itself will reboot automatically'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Star topology\'s defining resilience trait is that each device has its own independent cable run to the central switch, so a single cable fault is isolated to that one device and does not cascade to any other connected workstation.',
+misconception:'Technicians sometimes assume any cable fault risks a wider outage, confusing star topology\'s isolated-fault behavior with legacy shared-bus topologies where a single break could take down a whole segment.'},
+
+{objective:'2.4',topic:'Wireless Networking',diff:'adv',
+stem:'A conference room\'s Wi-Fi drops every time a presenter starts a wireless screen-mirroring session from their laptop, even though the access point is strong and close by. What is a likely explanation worth investigating?',
+opts:['The access point firmware is outdated','The screen-mirroring technology may be using the same 2.4GHz or 5GHz channel the Wi-Fi network relies on, creating contention that is worse the moment the mirroring session actively starts transmitting','The laptop\'s battery is low','The projector bulb is failing'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Wireless screen-mirroring protocols often operate in the same Wi-Fi bands and can create real channel contention with the room\'s access point, especially once the mirroring session is actively streaming video rather than idle, which lines up with the stated timing of the drops.',
+misconception:'Technicians look for a hardware fault in the access point itself when the problem is actually contention between two different wireless technologies competing for the same spectrum.'},
+
+{objective:'2.4',topic:'Wireless Networking',diff:'found',
+stem:'A technician needs to assign non-overlapping 2.4GHz Wi-Fi channels to three access points positioned in adjacent rooms to minimize interference between them. Which channel set should be used?',
+opts:['1, 2, 3','1, 6, 11','3, 6, 9','1, 5, 9'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Channels 1, 6, and 11 are the standard non-overlapping 2.4GHz channel set in most regulatory domains, spaced far enough apart that adjacent access points on these channels do not step on each other\'s transmissions.',
+misconception:'Technicians sometimes assume any numerically spread-out set of channels avoids overlap, without knowing the specific 1/6/11 spacing that 2.4GHz channel width actually requires.'},
+
+{objective:'2.5',topic:'Cabling',diff:'inter',
+stem:'A technician is asked to run new network cable through the open space above a drop ceiling that is also used by the building\'s HVAC system as a return-air plenum. What cable property is required by code for this specific run?',
+opts:['Shielded twisted pair for EMI resistance','A plenum-rated jacket, since standard PVC-jacketed cable releases more toxic smoke if it burns in a space that circulates air throughout the building','The highest category rating available (e.g., Cat 8)','A fiber optic cable instead of copper'],
+ans:1,
+rationale:'<strong>B is correct.</strong> A return-air plenum circulates air through the building, so fire code requires plenum-rated cable jacketing specifically because it is formulated to produce less smoke and fewer toxic byproducts if it burns, independent of category rating or shielding.',
+misconception:'Technicians sometimes think a higher category rating or shielding substitutes for plenum rating, when plenum rating is a fire-code jacket requirement unrelated to a cable\'s data-speed category.'},
+
+{objective:'2.6',topic:'SOHO Security',diff:'found',
+stem:'A technician is setting up a new small-office router and wants to reduce the risk of an attacker gaining full administrative control. What is the single most important first step?',
+opts:['Disabling the SSID broadcast','Changing the default administrator username and password, since default credentials for common router models are widely published','Setting the Wi-Fi channel to a less common number','Lowering the Wi-Fi transmit power'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Default admin credentials for popular router models are publicly documented and trivially searchable; leaving them unchanged gives any attacker on the network an easy path to full administrative control, making this the highest-priority first step.',
+misconception:'Technicians sometimes prioritize minor obscurity measures like hiding the SSID over the far more consequential step of changing default administrative credentials.'},
+
+{objective:'2.6',topic:'Network Devices',diff:'inter',
+stem:'A company wants guest Wi-Fi traffic to be completely unable to reach internal file servers, while still running both networks through the same physical switch to save on hardware. What should the technician configure?',
+opts:['A longer Ethernet cable run to the guest access point','A separate VLAN for guest traffic, logically isolating it from the internal server VLAN on the same physical switch','A second SSID with the same password','A static IP for the guest access point'],
+ans:1,
+rationale:'<strong>B is correct.</strong> A VLAN logically segments traffic on shared physical infrastructure, letting guest devices be isolated from internal servers at the network layer without the cost of separate physical switches — exactly the stated requirement.',
+misconception:'Technicians look for a physical-cabling answer to what is actually a logical segmentation requirement that VLANs solve without additional hardware.'},
+
+{objective:'2.7',topic:'SOHO Configuration',diff:'adv',
+stem:'A remote employee needs to reach an internal file server on port 445 from home without IT exposing SMB directly to the public internet, given how frequently that port is targeted by ransomware. What should IT set up instead?',
+opts:['Forward port 445 on the firewall directly to the file server','Set up a VPN so the employee\'s traffic tunnels into the internal network, then reaches the file server as if locally connected, without exposing SMB publicly','Change the file server\'s IP address weekly','Turn off the firewall for that one server only'],
+ans:1,
+rationale:'<strong>B is correct.</strong> A VPN tunnels the remote employee\'s traffic into the internal network so SMB access works exactly as it would in the office, without ever exposing port 445 to the public internet — avoiding a well-known, frequently exploited attack surface.',
+misconception:'Technicians treat port forwarding as the default, simplest fix for remote access without weighing that doing so on a historically high-risk port like 445 creates serious exposure a VPN avoids entirely.'},
+
+{objective:'2.1',topic:'IPv6 Basics',diff:'inter',
+stem:'A technician configuring a new server notices its network interface has automatically acquired a 128-bit address starting with fe80::. What does this address type indicate?',
+opts:['A public, globally routable IPv6 address','A link-local IPv6 address, automatically generated for communication only within the local network segment, not routable beyond it','An IPv4-mapped address','A DNS server address'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Addresses in the fe80::/10 range are link-local IPv6 addresses, automatically assigned to every IPv6-enabled interface for communication on the local segment only; they are never routed beyond that segment and do not indicate a connectivity problem.',
+misconception:'Technicians sometimes see an unfamiliar IPv6 address and assume misconfiguration, when a link-local address appearing alongside a normal routable address is completely expected IPv6 behavior.'},
+
+{objective:'2.2',topic:'Ports & Protocols',diff:'adv',
+stem:'A network engineer wants to allow normal DNS lookups through the firewall to an internal DNS server while limiting the risk of unauthorized zone transfers. What is the most precise rule to write?',
+opts:['Block port 53 entirely','Allow UDP port 53 for standard queries, and tightly restrict or monitor TCP port 53, which handles larger responses and full zone transfers','Allow only port 443 and block port 53','Allow ICMP only, and block all of port 53'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Standard DNS queries typically run over UDP port 53, while TCP port 53 handles larger responses and zone transfers; permitting UDP for normal lookups while tightly controlling TCP 53 lets ordinary DNS function while reducing the risk of an unauthorized full zone transfer.',
+misconception:'Technicians often treat "port 53 is DNS" as a single undifferentiated rule, missing that the UDP/TCP split on that same port number carries real, distinct security implications.'},
+
+{objective:'2.3',topic:'Network Devices',diff:'found',
+stem:'A technician needs a device that will forward frames only to the specific port associated with the destination MAC address, rather than broadcasting every frame out every port. Which device should be used?',
+opts:['A hub','A switch','A repeater','A modem'],
+ans:1,
+rationale:'<strong>B is correct.</strong> A switch learns MAC addresses and forwards frames only to the relevant port, unlike a hub, which simply repeats every incoming frame out all ports regardless of destination, causing unnecessary collisions and wasted bandwidth.',
+misconception:'Technicians sometimes use "hub" and "switch" interchangeably in casual conversation, missing that hubs are largely obsolete precisely because of this inefficient, non-selective forwarding behavior.'},
+
+{objective:'2.4',topic:'Wireless Networking',diff:'found',
+stem:'A user asks why their laptop automatically disconnects from the office 5GHz network when they walk into a room at the far end of the building, even though their phone stays connected fine. What is the most likely explanation?',
+opts:['The laptop\'s Wi-Fi card does not support 5GHz as well as the phone\'s, or the 5GHz signal is attenuating faster over distance/walls than the phone\'s connection path','The laptop needs a new battery','The office has too many SSIDs broadcasting','The laptop\'s MAC address changed'],
+ans:0,
+rationale:'<strong>A is correct.</strong> 5GHz signals attenuate faster through walls and over distance than 2.4GHz; a laptop whose radio or antenna handles that range less gracefully than the phone\'s can drop out at a distance the phone still tolerates, without indicating any fault beyond normal radio behavior.',
+misconception:'Technicians look for a configuration error when a distance-dependent signal attenuation difference between two different devices\' radios is sufficient to explain the symptom on its own.'},
+
+{objective:'2.5',topic:'Cabling',diff:'found',
+stem:'A technician just terminated a new Cat 6 cable to a wall jack and wants to confirm all 8 wires are connected in the correct order before closing up the wall. What tool should be used?',
+opts:['A punchdown tool','A cable tester/certifier','A crimper','A toner probe'],
+ans:1,
+rationale:'<strong>B is correct.</strong> A cable tester (or certifier for deeper performance validation) checks continuity and correct wire-pair ordering across all 8 conductors, confirming the termination is correct before the technician commits to closing up the wall.',
+misconception:'Technicians sometimes assume the tool used to make the termination (the punchdown tool) also verifies it, when the punchdown tool only creates the physical connection and does not test it.'},
+
+{objective:'2.6',topic:'Network Devices',diff:'adv',
+stem:'A company wants to block specific website categories (like streaming or social media) based on actual page content, not just IP address or port. What type of device is required beyond a basic packet-filtering firewall?',
+opts:['A basic unmanaged switch','A next-generation firewall (NGFW) or content-filtering proxy capable of deep packet inspection at the application layer','A simple hub','A loopback plug'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Basic packet-filtering firewalls only evaluate IP addresses, ports, and protocols; filtering by actual page content or application category requires deep packet inspection, which is a next-generation firewall or dedicated content-filtering proxy capability, not a basic firewall feature.',
+misconception:'Technicians assume any firewall can filter by content category, missing that basic packet filtering only sees addressing information, not the actual application-layer content being carried.'},
+
+{objective:'2.7',topic:'SOHO Configuration',diff:'inter',
+stem:'A technician wants a security camera on the home network to always be reachable at the same local IP address without manually configuring a static IP on the camera itself. What router feature accomplishes this?',
+opts:['Port forwarding','A DHCP reservation that ties the camera\'s MAC address to a fixed IP within the DHCP scope','Changing the SSID name','Enabling UPnP'],
+ans:1,
+rationale:'<strong>B is correct.</strong> A DHCP reservation binds a specific device\'s MAC address to a consistent IP address within the existing DHCP scope, guaranteeing that address every time without requiring any manual static IP configuration on the device itself.',
+misconception:'Technicians sometimes reach for port forwarding, which controls external access to a device, rather than DHCP reservation, which is the feature that actually guarantees a consistent internal address.'},
+
+{objective:'2.4',topic:'Wireless Networking',diff:'adv',
+stem:'A warehouse reports Wi-Fi dead zones near a specific row of shelving that was not a problem before a recent inventory change. The new inventory on those shelves is dense metal stock. What is the most likely cause?',
+opts:['The access point firmware needs updating','The dense metal stock is reflecting and absorbing the RF signal, creating new multipath interference and signal attenuation that did not exist with the previous inventory','The SSID broadcast was disabled','The DHCP scope ran out of addresses'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Dense metal objects reflect and absorb RF energy, and a change in what is stored on shelving directly between an access point and its coverage area can introduce new multipath interference or attenuation that simply did not exist with the prior inventory, without any device misconfiguration at all.',
+misconception:'Technicians look for a configuration or firmware explanation for a coverage change, overlooking that a change in the physical environment itself (new dense materials in the signal path) can fully explain new dead zones.'},
+
+{objective:'2.5',topic:'Cabling',diff:'adv',
+stem:'A long Ethernet run between two buildings experiences data errors that worsen during electrical storms and when a nearby industrial motor cycles on. What cabling change most directly eliminates this specific interference?',
+opts:['Switching to a shorter Cat 5e cable','Switching to fiber optic cable, which carries data as light and is immune to electromagnetic interference','Switching to Cat 3 cable','Adding more connectors along the run'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Fiber optic cable transmits data as light rather than electrical signals, making it immune to the electromagnetic interference from lightning and industrial motors described here — the standard fix for EMI-prone runs, which a shorter or lower-category copper cable would not resolve.',
+misconception:'Technicians sometimes try to fix an EMI problem by changing copper cable length or category, missing that the root cause (electrical interference) requires eliminating electrical signaling altogether.'},
+
+{objective:'2.6',topic:'SOHO Security',diff:'inter',
+stem:'A technician disables SSID broadcast on a home router as a security measure and tells the homeowner the network is now hidden from attackers. Is this an accurate security claim?',
+opts:['Yes, hidden SSIDs cannot be detected by any means','Not fully — disabling SSID broadcast only stops the name from appearing in a casual device list; dedicated wireless scanning tools can still detect the hidden network', 'Yes, because hidden networks also encrypt all traffic automatically','No, disabling SSID broadcast actually disconnects all existing devices permanently'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Disabling SSID broadcast only removes the network name from casual browsing in a device\'s Wi-Fi list; the network still transmits detectable signals, and tools built to find hidden networks can reveal it, making this a minor deterrent rather than real security.',
+misconception:'Technicians sometimes overstate hidden SSIDs as strong security, treating security-through-obscurity as equivalent to actual encryption-based protection like WPA3.'},
+
+{objective:'2.7',topic:'SOHO Configuration',diff:'found',
+stem:'A technician explains that a SOHO router lets eight internal devices share one public IP address issued by the ISP. What feature makes this possible?',
+opts:['DHCP','NAT (Network Address Translation)','DNS','SSID broadcasting'],
+ans:1,
+rationale:'<strong>B is correct.</strong> NAT translates between many private internal addresses and a single public address (and back for return traffic), which is exactly how a SOHO router lets multiple internal devices share one ISP-issued public IP.',
+misconception:'Technicians sometimes credit DHCP for this behavior since both are commonly configured on the same router, when DHCP only assigns internal addresses and NAT is the feature that actually enables the address-sharing.'},
+
+{objective:'2.3',topic:'Network Topologies',diff:'adv',
+stem:'A company\'s core routers are connected in a full mesh for redundancy. As the company adds a fifth core router to the mesh, what should the technician expect regarding the cabling/connections required?',
+opts:['No additional connections are needed beyond what already exists','The number of required direct connections grows significantly, since a full mesh needs a dedicated link between every pair of nodes','Exactly one new connection is needed, to the nearest existing router','The mesh topology automatically converts to a star topology at five nodes'],
+ans:1,
+rationale:'<strong>B is correct.</strong> A full mesh requires a direct link between every pair of nodes, so each additional node adds a connection to every existing node; growing from four to five nodes means adding four new direct links, illustrating why full mesh redundancy becomes costly to cable as the network grows.',
+misconception:'Technicians sometimes assume mesh redundancy scales for free, without accounting for how quickly the required number of direct connections grows as nodes are added.'},
+
+{objective:'2.2',topic:'Ports & Protocols',diff:'inter',
+stem:'A technician needs to transfer a large configuration file to a remote Linux server securely, using the same authenticated channel already set up for SSH access. Which protocol/port should be used?',
+opts:['Plain FTP on port 21','SFTP, which rides over the existing SSH session on port 22','TFTP on port 69','HTTP on port 80'],
+ans:1,
+rationale:'<strong>B is correct.</strong> SFTP operates over SSH (port 22), reusing the same encrypted, already-authenticated channel rather than opening a separate unencrypted file-transfer protocol like plain FTP or TFTP, which transmit data without encryption.',
+misconception:'Technicians sometimes treat "FTP" and "SFTP" as interchangeable because of the similar name, missing that SFTP specifically rides over SSH\'s encrypted channel rather than using FTP\'s own ports and protocol.'},
+];
+
+// --- SIM DOMAIN 3: HARDWARE (32) ---
+const SIM_HARDWARE=[
+{objective:'3.1',topic:'Motherboard Components',diff:'found',
+stem:'A technician installs a new CPU and cooler but the system will not POST. The technician reseats the RAM with no change. What is the next reasonable thing to verify before assuming the CPU is defective?',
+opts:['The Wi-Fi adapter is seated correctly','That the CPU\'s auxiliary power connector (e.g., the 4/8-pin near the CPU socket) is actually connected, since the main 24-pin connector alone does not power the CPU','The monitor\'s resolution setting','The case fan RPM'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Many boards will not POST at all if the dedicated CPU power connector near the socket is left unplugged, even with the 24-pin main connector fully seated; this is a common, easily overlooked cause of a no-POST condition after a fresh build.',
+misconception:'Technicians sometimes assume the single 24-pin connector powers the entire board including the CPU, overlooking that the CPU draws its power through its own separate connector.'},
+
+{objective:'3.1',topic:'CPU Sockets',diff:'inter',
+stem:'A technician upgrading a CPU confirms the new chip physically fits the socket but the system will not boot afterward, showing a blank screen with no beep codes. What should be checked first?',
+opts:['Whether the motherboard\'s BIOS version actually supports that CPU generation, since physical socket compatibility does not guarantee firmware-level support','The monitor brightness setting','The keyboard layout','The case\'s front-panel USB ports'],
+ans:0,
+rationale:'<strong>A is correct.</strong> A CPU can physically fit a socket while the motherboard\'s shipped BIOS version predates official support for that specific CPU generation, which can prevent booting entirely until the board is updated — physical fit alone never guarantees firmware-level compatibility.',
+misconception:'Technicians treat "the CPU physically fits the socket" as proof of full compatibility, without checking whether the board\'s current firmware actually recognizes that specific CPU generation.'},
+
+{objective:'3.2',topic:'RAM',diff:'found',
+stem:'A technician tries to install a DDR5 memory module into a motherboard that only supports DDR4. What happens?',
+opts:['It installs and runs, just slower than rated','It physically cannot be inserted, since DDR4 and DDR5 modules use different notch positions specifically to prevent this','It installs but damages the CPU immediately','It installs and the system reports it as DDR3'],
+ans:1,
+rationale:'<strong>B is correct.</strong> DDR generations are deliberately keyed with different notch positions along the module edge, so a DDR5 stick physically cannot be seated into a DDR4-only slot — the incompatibility is prevented mechanically before it ever becomes an electrical issue.',
+misconception:'Technicians sometimes think a wrong-generation module will underperform rather than simply fail to insert at all, missing that the physical keying exists specifically to prevent that scenario.'},
+
+{objective:'3.2',topic:'RAM',diff:'adv',
+stem:'A workstation has four RAM slots in two colors (two grey, two black) for dual-channel operation. A technician installs two mismatched-capacity sticks into the two grey slots. The system boots and reports the correct combined total capacity. What is actually happening?',
+opts:['The system is in a hardware failure state and should be serviced immediately','The memory controller is likely running an asymmetric/flex-mode configuration, giving dual-channel benefit to the matched portion of capacity while the excess runs in single-channel','The combined capacity reported is inaccurate and should be ignored','The RAM is operating as RAID 1'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Many memory controllers support an asymmetric or flex-mode configuration that runs the matched portion of capacity across both sticks in dual-channel while the remaining excess capacity operates in single-channel — the system correctly reports total capacity while gaining a partial performance benefit, not a failure state.',
+misconception:'Technicians assume mismatched-capacity sticks force the entire configuration into single-channel, unaware that modern controllers can still extract a partial dual-channel benefit from the matched portion.'},
+
+{objective:'3.3',topic:'Storage Devices',diff:'found',
+stem:'A technician installs a new NVMe M.2 SSD, but after boot it does not appear in the OS, even though the slot is confirmed to be wired for NVMe. What should be checked first?',
+opts:['Whether the drive is reseated fully and the retaining screw is tightened, since a loose connection is a common and easily fixed cause of non-detection','Whether the drive needs defragmenting','Whether TRIM is enabled','Whether the drive needs a RAID controller'],
+ans:0,
+rationale:'<strong>A is correct.</strong> A drive that is not fully seated or not secured by its retaining screw can make poor contact with the M.2 slot, which is the most common and simplest cause of non-detection to rule out before considering a deeper hardware or firmware issue.',
+misconception:'Technicians sometimes jump to software explanations (TRIM, defragmentation) for a drive that is not even being detected at the hardware level, skipping the simplest physical check first.'},
+
+{objective:'3.3',topic:'RAID',diff:'adv',
+stem:'A RAID 5 array running on four drives has one drive fail and get replaced. Midway through the rebuild process, a second drive begins reporting read errors. What is the correct understanding of the array\'s state right now?',
+opts:['The array remains fully protected since RAID 5 can tolerate any number of failures during a rebuild','The array is now at serious, immediate risk, since RAID 5 only tolerates a single drive failure at a time and the rebuild has not yet completed','The array has automatically converted to RAID 0','Nothing changes until the rebuild finishes'],
+ans:1,
+rationale:'<strong>B is correct.</strong> RAID 5 provides single-drive fault tolerance through distributed parity; with the array already in a degraded, mid-rebuild state from the first failure, a second drive developing errors puts the entire array\'s data at serious, immediate risk until that drive issue is resolved.',
+misconception:'Technicians sometimes assume "RAID" broadly implies strong protection against multiple simultaneous failures, forgetting that RAID 5 specifically tolerates only one failure at a time.'},
+
+{objective:'3.4',topic:'Power Supplies',diff:'inter',
+stem:'A newly built gaming PC shuts down only when the GPU is under heavy load, and stays stable during idle or light use. The GPU\'s rated peak draw is close to the PSU\'s rated continuous output. What is the most likely explanation?',
+opts:['The CPU cooler fan is unplugged','The PSU is marginally undersized for the GPU\'s peak draw and cannot sustain the load, tripping a protection circuit','The monitor cable is loose','The keyboard driver is outdated'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Shutdowns correlated specifically with heavy GPU load, combined with a PSU whose rated output sits close to the GPU\'s peak draw, is the classic signature of insufficient power delivery headroom tripping a protection circuit under load.',
+misconception:'Technicians look for thermal or driver-related causes first, missing that the described pattern — stable at idle, fails only under GPU load, with a tight wattage margin — points directly to power delivery.'},
+
+{objective:'3.4',topic:'Cooling Methods',diff:'found',
+stem:'A technician installs a new CPU cooler and the system runs noticeably hotter than the old cooler, even though the fan spins at full speed and is confirmed seated correctly. What should be checked next?',
+opts:['The Wi-Fi antenna connection','Whether thermal paste was applied correctly between the CPU and the cooler\'s contact plate, including whether a protective film was left on the plate','The monitor cable','The keyboard backlight setting'],
+ans:1,
+rationale:'<strong>B is correct.</strong> With seating and fan operation already confirmed, the next most likely cause of poor heat transfer is the thermal interface itself — too little or uneven paste, or a forgotten protective film left on the cooler\'s contact plate — not an unrelated peripheral.',
+misconception:'Technicians sometimes look past the most direct explanation once basic seating and fan spin are confirmed, when thermal interface quality is exactly the next logical check in that sequence.'},
+
+{objective:'3.5',topic:'Printers',diff:'inter',
+stem:'A laser printer produces a repeating vertical defect on every page at a fixed interval, regardless of the document being printed. What does the fixed, repeating interval most strongly suggest?',
+opts:['A corrupted print driver','A defect on a rotating component, such as the imaging drum, since the defect repeats at an interval matching that component\'s circumference','A loose USB cable','An incorrect paper size setting'],
+ans:1,
+rationale:'<strong>B is correct.</strong> A defect that repeats at a fixed interval on every page, regardless of content, is the signature of a damaged or contaminated spot on a rotating component like the imaging drum — the interval itself maps to that component\'s circumference, not to the document or driver.',
+misconception:'Technicians sometimes chase software explanations (driver, paper settings) for a symptom whose fixed, repeating spacing is itself strong physical evidence pointing to a specific rotating hardware component.'},
+
+{objective:'3.5',topic:'Peripherals',diff:'found',
+stem:'A technician needs to let two engineers share one monitor, keyboard, and mouse between two separate workstations, switching between them with a single hotkey. What device should be used?',
+opts:['A USB hub','A KVM (Keyboard, Video, Mouse) switch','A network switch','A docking station'],
+ans:1,
+rationale:'<strong>B is correct.</strong> A KVM switch lets one set of peripherals control multiple computers, switching the active connection with a hotkey or button press — exactly the stated requirement, which a USB hub (which only expands port count) does not provide.',
+misconception:'Technicians sometimes confuse a KVM switch with a simple USB hub, which expands available ports but cannot switch a shared peripheral set between multiple independent computers.'},
+
+{objective:'3.1',topic:'BIOS/UEFI Settings',diff:'inter',
+stem:'A technician is preparing to install a hypervisor on a workstation and the installer reports that hardware-assisted virtualization is unavailable, even though the CPU supports it. What should be checked?',
+opts:['Whether Secure Boot is enabled','Whether the virtualization extension (Intel VT-x or AMD-V) is enabled in the BIOS/UEFI settings, since many boards ship with it disabled by default','Whether Fast Boot is enabled','Whether the TPM module is present'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Hardware-assisted virtualization extensions are frequently disabled by default in BIOS/UEFI even on fully capable CPUs; the installer correctly reports it unavailable until that specific firmware setting is enabled, independent of Secure Boot, Fast Boot, or TPM settings.',
+misconception:'Technicians sometimes confuse virtualization extensions with Secure Boot or TPM settings, which govern firmware integrity and key storage respectively, not CPU-level virtualization acceleration.'},
+
+{objective:'3.1',topic:'Motherboard Components',diff:'adv',
+stem:'A desktop that has worked reliably for three years now loses its BIOS date/time and any custom firmware settings every time it is powered off, even though the system otherwise boots and runs normally. What should be replaced?',
+opts:['The power supply','The CMOS battery, which maintains BIOS settings and the real-time clock while the system is powered off','The CPU','The case fans'],
+ans:1,
+rationale:'<strong>B is correct.</strong> The CMOS battery maintains the small memory holding BIOS/UEFI settings and the real-time clock when the system has no main power; a dying CMOS battery classically produces exactly this symptom — settings and clock resetting on every power-off cycle — while the system otherwise runs fine.',
+misconception:'Technicians unfamiliar with the CMOS battery\'s narrow, specific role sometimes attribute this symptom to broader power supply or motherboard failure, when it is a well-defined, inexpensive, and specific fix.'},
+
+{objective:'3.2',topic:'RAM',diff:'inter',
+stem:'A technician installs RAM rated at a higher speed than the motherboard\'s officially listed maximum support. What is the most likely practical outcome?',
+opts:['The system refuses to boot under any circumstances','The system runs, but the memory controller typically clocks the RAM down to the highest speed it actually supports rather than the module\'s full rated speed','The RAM permanently damages the CPU','The motherboard automatically updates its own firmware to support the new speed'],
+ans:1,
+rationale:'<strong>B is correct.</strong> RAM is generally backward-compatible; installing faster-rated modules than officially supported typically results in the system simply running that RAM at its own maximum supported speed rather than refusing to boot or suffering damage.',
+misconception:'Technicians sometimes expect a hard incompatibility when exceeding official speed support, when in most cases the system simply downclocks the RAM to a supported speed instead.'},
+
+{objective:'3.3',topic:'Storage Devices',diff:'inter',
+stem:'A technician installs a second internal drive, and it is visible in the BIOS/UEFI drive list but does not appear anywhere in the OS\'s file browser. What should be done next?',
+opts:['Replace the motherboard','Open the OS\'s disk management utility to check whether the drive needs to be initialized, partitioned, and assigned a drive letter','Reinstall the operating system entirely','Replace the power supply'],
+ans:1,
+rationale:'<strong>B is correct.</strong> A drive visible in BIOS but absent from the OS\'s file browser usually has not yet been initialized or partitioned at the OS level; using the disk management utility to complete that setup typically resolves it without any hardware replacement.',
+misconception:'Technicians sometimes assume a drive invisible in the OS is a hardware fault, overlooking that BIOS detection already confirms the physical connection is fine and the issue is purely at the OS disk-configuration level.'},
+
+{objective:'3.4',topic:'Power Supplies',diff:'found',
+stem:'A technician is comparing two power supplies with identical wattage ratings but different 80 PLUS certification tiers (Bronze vs. Gold). What does the Gold rating actually indicate?',
+opts:['The Gold unit can output more total wattage than its rating states','The Gold unit converts AC input to DC output more efficiently at a given load, wasting less as heat, compared to the Bronze unit','The Gold unit is a larger physical size standard','The Gold unit only works with certain CPUs'],
+ans:1,
+rationale:'<strong>B is correct.</strong> 80 PLUS certification tiers measure power conversion efficiency — how much input power becomes usable output versus wasted heat — at a given load; a higher tier like Gold indicates better efficiency, not a higher wattage capacity than stated.',
+misconception:'Technicians sometimes think the certification tier reflects raw output capacity, when it actually measures conversion efficiency independent of the unit\'s wattage rating.'},
+
+{objective:'3.5',topic:'Printers',diff:'adv',
+stem:'A thermal receipt printer produces output with a consistent vertical white line running the full length of every receipt, regardless of what is printed. What is the most likely cause?',
+opts:['A low ink cartridge, since thermal printers use ink that can run low','A section of the print head\'s heating element is dirty or damaged and not transferring heat to the paper at that position','The wrong paper size is loaded','The USB cable is too long'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Thermal printers have no ink; a consistent, fixed-position vertical white line across every receipt points to a specific section of the heating element failing to transfer heat to the thermal paper at that exact position, not an ink or paper-size issue.',
+misconception:'Technicians sometimes reach for an ink explanation out of habit, forgetting that thermal printers use a heated element against specially coated paper and carry no ink or toner at all.'},
+
+{objective:'3.2',topic:'RAM',diff:'found',
+stem:'A server administrator is selecting RAM for a system that must detect and correct single-bit memory errors automatically during continuous operation. What RAM feature is required?',
+opts:['Higher clock speed','ECC (Error-Correcting Code)','SODIMM form factor','Lower CAS latency'],
+ans:1,
+rationale:'<strong>B is correct.</strong> ECC RAM includes extra bits specifically used to detect and correct single-bit errors on the fly, which is the defining feature needed for continuous, reliability-critical operation — clock speed and form factor do not provide this capability.',
+misconception:'Technicians sometimes think ECC is primarily about speed, when its defining benefit is reliability through automatic single-bit error correction, sometimes at a slight cost to raw speed.'},
+
+{objective:'3.3',topic:'Storage Devices',diff:'found',
+stem:'A technician notices an SSD\'s write performance has degraded noticeably as it filled up over time. Which OS-level feature is designed specifically to help sustain SSD write performance?',
+opts:['Disk Defragmenter','TRIM','chkdsk','Disk Cleanup'],
+ans:1,
+rationale:'<strong>B is correct.</strong> TRIM lets the OS inform the SSD which blocks hold deleted data so the drive controller can erase them proactively ahead of new writes, which is specifically designed to sustain write performance as the drive fills — defragmentation is irrelevant and harmful to SSDs.',
+misconception:'Technicians sometimes reach for defragmentation out of habit from HDD maintenance, not realizing it provides no benefit on an SSD and adds unnecessary write wear.'},
+
+{objective:'3.4',topic:'Power Protection',diff:'inter',
+stem:'A server room loses utility power during a storm. The servers are on a UPS, which keeps them running for several minutes before a generator takes over. What is the UPS\'s actual designed role in this sequence?',
+opts:['To run the servers indefinitely with no time limit','To bridge the short gap between the power loss and either a graceful shutdown or the generator coming online, not to provide sustained long-term power','To permanently increase server processing speed','To filter Wi-Fi signals'],
+ans:1,
+rationale:'<strong>B is correct.</strong> A UPS is designed to bridge a short gap — enough runtime for a graceful shutdown or for backup generator power to engage — rather than to sustain operation indefinitely, which is exactly the role described in this scenario.',
+misconception:'Technicians or stakeholders sometimes expect a UPS to run equipment indefinitely during a long outage, when its actual designed purpose is a short, deliberate bridge.'},
+
+{objective:'3.5',topic:'Peripherals',diff:'adv',
+stem:'A technician is about to install a new expansion card into a desktop and wants to minimize the risk of electrostatic discharge damaging sensitive components. What is the most direct preventive step?',
+opts:['Working on a thickly carpeted floor for insulation','Wearing a properly grounded anti-static wrist strap connected to the case chassis before touching internal components','Wearing wool gloves','Working in a very low-humidity room'],
+ans:1,
+rationale:'<strong>B is correct.</strong> A properly grounded anti-static wrist strap equalizes electrical potential between the technician and the chassis, actively draining static buildup before it can discharge through sensitive components — the most direct and standard ESD prevention practice.',
+misconception:'Technicians sometimes think low humidity is protective, when low humidity actually increases static buildup risk; proper grounding, not dry air, is the real mitigating factor.'},
+
+{objective:'3.3',topic:'RAID',diff:'found',
+stem:'A technician sets up two identical drives in RAID 0 for maximum speed in a video-editing workstation. What tradeoff does the customer need to understand before relying on this configuration?',
+opts:['RAID 0 doubles the storage capacity with full redundancy, so there is no real tradeoff','RAID 0 stripes data across both drives with no redundancy at all — if either drive fails, all data on the array is lost','RAID 0 is slower than a single drive but safer','RAID 0 requires at least four drives to function'],
+ans:1,
+rationale:'<strong>B is correct.</strong> RAID 0 stripes data across drives purely for speed and combined capacity, with zero redundancy; the loss of either drive destroys the entire array\'s data, which is the critical tradeoff the customer must accept before relying on it for important work.',
+misconception:'Customers sometimes assume any "RAID" configuration implies some level of data protection by definition, overlooking that RAID 0 specifically trades away all redundancy for raw performance and capacity.'},
+
+{objective:'3.4',topic:'Power Supplies',diff:'found',
+stem:'A technician building a compact PC wants to minimize visible internal cabling for airflow and aesthetics. Which PSU feature directly helps with this goal?',
+opts:['Modular cabling, which lets the builder attach only the specific cables needed and leave the rest out of the case entirely','A higher wattage rating','A larger physical PSU size','80 PLUS Platinum certification'],
+ans:0,
+rationale:'<strong>A is correct.</strong> A modular PSU lets the builder connect only the cables actually needed for that specific build, leaving unused cables out of the case entirely, which directly reduces clutter and improves airflow compared to a fully non-modular design.',
+misconception:'Technicians sometimes conflate PSU efficiency rating (80 PLUS tier) or wattage with cable management, when those are separate specifications unrelated to how many cables are permanently attached.'},
+
+{objective:'3.5',topic:'Printers',diff:'found',
+stem:'A technician is asked why a dot matrix printer is still used for printing multi-part carbonless forms in a shipping department instead of a modern laser printer. What is the technical reason?',
+opts:['Dot matrix printers are cheaper to buy new today','Dot matrix (impact) printers physically strike the paper through an inked ribbon, which is the only common method able to transfer an image through multiple carbonless copy layers simultaneously','Laser printers cannot print on any colored paper','Dot matrix printers print faster than laser printers'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Impact printers physically strike an inked ribbon against the paper stack, making direct physical contact that transfers an image through multiple carbonless layers at once — a capability laser and inkjet printers, which never physically contact the paper that way, do not have.',
+misconception:'Technicians unfamiliar with legacy print technology sometimes assume any printer upgrade is strictly better, missing that multi-part carbonless forms specifically require the physical impact mechanism dot matrix printers provide.'},
+
+{objective:'3.2',topic:'RAM',diff:'adv',
+stem:'A workstation needs to run several large virtual machines simultaneously, each with dedicated memory, alongside memory-intensive host applications. What is the most critical RAM-related planning consideration?',
+opts:['Choosing RAM with the brightest RGB lighting','Ensuring total installed physical RAM comfortably exceeds the sum of all VM allocations plus host OS and application overhead, to avoid the host resorting to disk-based swapping','Using only single-channel RAM for stability','Avoiding ECC RAM regardless of workload'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Planning adequate physical RAM headroom covering all VM allocations plus host overhead prevents the host from swapping to disk under memory pressure, which would severely degrade performance for this memory-intensive multi-VM workload — this matters more than RAM speed or channel configuration here.',
+misconception:'Technicians sometimes focus on RAM speed or channel configuration as the primary concern, when for this scenario the more fundamental issue is simply having sufficient total capacity to avoid host-level memory pressure.'},
+
+{objective:'3.1',topic:'BIOS/UEFI Settings',diff:'adv',
+stem:'A technician attempts to install Windows in UEFI mode with Secure Boot enabled, but the installer cannot see the target drive at all. The drive is healthy and detected correctly in the BIOS. What is a likely mismatch?',
+opts:['The RAM is the wrong speed','The drive is partitioned as MBR when UEFI/Secure Boot expects GPT, or the installation media itself was created for legacy BIOS boot rather than UEFI','The CPU does not support USB 3.0','The monitor resolution is set too low'],
+ans:1,
+rationale:'<strong>B is correct.</strong> UEFI with Secure Boot generally expects a GPT-partitioned drive and UEFI-mode installation media; a drive partitioned as MBR, or media prepared for legacy BIOS boot, can fail to appear as a valid installation target even though the BIOS detects the drive fine at the hardware level.',
+misconception:'Technicians often look for a hardware-capacity explanation (RAM, CPU features) for what is actually a firmware-mode and partition-style mismatch between UEFI/GPT and legacy BIOS/MBR conventions.'},
+
+{objective:'3.3',topic:'Storage Devices',diff:'adv',
+stem:'A drive\'s SMART data shows a steadily climbing "reallocated sector count" over several weeks, though the drive has not failed yet. What should the technician recommend?',
+opts:['Ignore it, since reallocated sectors are purely cosmetic','Back up the data and plan for drive replacement soon, since a rising reallocated sector count is one of the strongest SMART predictors of impending physical drive failure','Reformat the drive to clear the warning','Run TRIM to fix the reallocated sectors'],
+ans:1,
+rationale:'<strong>B is correct.</strong> A steadily increasing reallocated sector count is one of the most reliable SMART-based predictors of progressive physical degradation; the correct response is proactive backup and replacement planning, since reformatting does nothing to repair the underlying physical wear.',
+misconception:'Technicians sometimes think reformatting resets the underlying health issue along with the SMART warning, when reformatting only affects the filesystem, not the physically degrading media beneath it.'},
+
+{objective:'3.4',topic:'Cooling Methods',diff:'inter',
+stem:'A case has several intake fans but no clear exhaust fan, and internal temperatures remain high despite the extra intake fans added. What explains this?',
+opts:['More fans in any configuration always improve cooling regardless of direction','Without a clear exhaust path, warmed air can become trapped inside the case even with strong intake, since airflow needs both intake and exhaust working together','The CPU is permanently throttled by the extra fans','The power supply cannot support additional fans'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Effective case airflow depends on a balance of intake and exhaust; an intake-heavy setup with no clear exhaust path can trap warmed air inside the case rather than expelling it, undermining thermal performance despite having more fans installed.',
+misconception:'Technicians often assume more fans in any configuration automatically improves cooling, overlooking that airflow direction and balance between intake and exhaust matters as much as fan quantity.'},
+
+{objective:'3.5',topic:'Peripherals',diff:'inter',
+stem:'A competitive gaming setup uses a keyboard with a proprietary 2.4GHz USB receiver rather than Bluetooth. What is the main technical reason for this choice?',
+opts:['The 2.4GHz receiver uses no battery at all','A dedicated 2.4GHz RF receiver typically offers lower and more consistent input latency than Bluetooth\'s connection negotiation and power-saving behaviors','2.4GHz receivers can connect to unlimited devices simultaneously','Bluetooth keyboards cannot be used for gaming under any circumstances'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Dedicated 2.4GHz RF receivers are generally engineered for lower, more consistent latency than Bluetooth, whose connection negotiation and power-saving behaviors can introduce variability that matters in fast-paced, performance-sensitive applications like competitive gaming.',
+misconception:'Technicians sometimes treat Bluetooth and proprietary 2.4GHz RF as interchangeable "wireless" options, missing the real latency-consistency tradeoff that matters specifically for performance-sensitive use cases.'},
+
+{objective:'3.1',topic:'Expansion Cards',diff:'found',
+stem:'A motherboard has one PCIe x16 slot and one PCIe x1 slot. A technician needs to install a high-end graphics card and a basic network adapter. Which slot should each use?',
+opts:['Either card can go in either slot with no difference','The graphics card should use the x16 slot for maximum bandwidth; the basic network adapter functions fine in the lower-bandwidth x1 slot','Both cards must go in the x16 slot simultaneously','The network adapter must use the x16 slot and the GPU the x1 slot'],
+ans:1,
+rationale:'<strong>B is correct.</strong> PCIe slot naming reflects electrical lane count, which directly caps available bandwidth; a high-bandwidth device like a GPU needs the x16 slot\'s lanes, while a basic network adapter\'s modest bandwidth needs are easily met by the smaller x1 slot.',
+misconception:'Technicians sometimes think all PCIe slots are interchangeable because they share the same interface family name, missing that lane count directly limits the bandwidth available to whatever card occupies that slot.'},
+
+{objective:'3.2',topic:'RAM',diff:'inter',
+stem:'A desktop that previously ran fine begins failing to boot after a user adds extra RAM sticks purchased separately from the original kit, from a different manufacturer. What is a likely cause?',
+opts:['The power supply connector color is wrong','The new sticks are mismatched in speed, timing, or voltage relative to the original kit, causing instability the memory controller cannot resolve','The monitor cable needs replacing','The CPU socket changed automatically when RAM was added'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Mixing RAM modules from different kits can introduce mismatches in speed, timing, or voltage that the memory controller cannot reliably negotiate across all installed sticks, which is a well-documented, real-world cause of boot instability after adding RAM from a different source.',
+misconception:'Technicians sometimes assume any RAM of the correct generation (DDR4, DDR5, etc.) is automatically fully compatible together, overlooking that speed/timing/voltage mismatches between separately purchased kits can cause real instability.'},
+
+{objective:'3.3',topic:'Storage Devices',diff:'inter',
+stem:'A photographer needs an external drive for field work that will be handled roughly, dropped occasionally, and needs to transfer large files quickly. Why would a portable SSD be recommended over a portable HDD?',
+opts:['Portable SSDs are always free with camera purchases','Portable SSDs combine fast transfer speeds with much better shock resistance, since they have no moving parts, unlike an HDD\'s mechanical read/write head that is vulnerable to drops','Portable SSDs have unlimited storage capacity','Portable SSDs require no cable to connect'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Portable SSDs offer both fast transfer speeds and significantly better physical shock resistance than mechanical HDDs, whose moving read/write heads are vulnerable to exactly the kind of rough handling and drops described in field photography work.',
+misconception:'Technicians sometimes focus only on speed when recommending SSDs, overlooking that the durability advantage is equally, if not more, relevant for this specific rough-handling use case.'},
+
+{objective:'3.4',topic:'Power Supplies',diff:'adv',
+stem:'A technician replacing a failed PSU in a workstation notices the new unit has a different connector layout for the motherboard\'s auxiliary CPU power, even though the main 24-pin connector matches. What should the technician do?',
+opts:['Force the connector into place; connectors are universal across PSUs','Verify the new PSU\'s connector types and counts match what the motherboard actually requires before completing the installation, since auxiliary CPU power connectors vary (4-pin, 4+4 pin, 8-pin) across PSU models','Use electrical tape to join mismatched connector pins','Return the motherboard instead of the PSU'],
+ans:1,
+rationale:'<strong>B is correct.</strong> CPU auxiliary power connectors vary across PSU models (4-pin, combined 4+4 pin, or 8-pin), and a technician must confirm the replacement PSU\'s connector actually matches what the motherboard requires rather than forcing an incompatible connector into place.',
+misconception:'Technicians under time pressure sometimes assume all PSU connectors are universal because the main 24-pin connector matched, overlooking that auxiliary CPU power connector styles can differ between PSU models.'},
+];
+
+// --- SIM DOMAIN 4: VIRTUALIZATION & CLOUD (19) ---
+const SIM_VIRTUALIZATION=[
+{objective:'4.1',topic:'Hypervisor Types',diff:'found',
+stem:'A systems administrator needs to run a security analyst\'s suspicious file in a way that guarantees it cannot reach any other system on the network or the internet. What should be used?',
+opts:['A Type 1 hypervisor with default networking','A sandboxed VM with its network adapter disabled or isolated, specifically preventing any outbound communication','A private cloud instance','VDI with standard network access'],
+ans:1,
+rationale:'<strong>B is correct.</strong> A sandbox is an isolated environment specifically meant to run untrusted code without risk to the host or network; disabling or isolating its network adapter is what actually guarantees no outbound communication, which neither a standard Type 1 hypervisor VM nor VDI provides by default.',
+misconception:'Technicians sometimes assume any virtual machine is automatically isolated from the network, when a VM\'s default configuration typically includes full network access unless deliberately restricted.'},
+
+{objective:'4.1',topic:'Hypervisor Types',diff:'inter',
+stem:'A company wants maximum VM density and performance per physical server for a new production data center. Which hypervisor approach is standard practice, and why would installing a hosted hypervisor on top of a full desktop OS be the wrong choice here?',
+opts:['A Type 2 hosted hypervisor, because it is simpler to set up','A Type 1 bare-metal hypervisor, since eliminating the host OS layer reduces overhead and maximizes resources available to guest VMs — overhead a Type 2 setup would add unnecessarily at this scale','Running VMs inside a single large VM','Avoiding virtualization entirely for performance'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Production data centers use Type 1 bare-metal hypervisors specifically because removing the host OS layer reduces overhead and maximizes resources available to guest VMs; a Type 2 hypervisor\'s added host-OS layer is unnecessary overhead at the density and performance level a production data center requires.',
+misconception:'Technicians sometimes think Type 2 hypervisors are simply the easier, "always fine" choice without weighing how the added host-OS overhead becomes a real liability at production data-center scale.'},
+
+{objective:'4.2',topic:'VM Resource Allocation',diff:'inter',
+stem:'A host server with 64GB of physical RAM is running five VMs, each configured with a 16GB static memory reservation. What problem does this configuration create?',
+opts:['No problem, this is standard practice','The sum of the reservations (80GB) exceeds the host\'s physical 64GB, so the host cannot honor all five reservations simultaneously','The VMs will automatically compress their data to fit','The extra 16GB is automatically borrowed from network storage'],
+ans:1,
+rationale:'<strong>B is correct.</strong> A memory reservation is a guaranteed allocation; the sum of all reservations on a host cannot exceed its physical memory, so 80GB of reservations on a 64GB host means the host cannot actually guarantee all five simultaneously, regardless of whether all VMs are under light load.',
+misconception:'Technicians sometimes confuse memory reservations (hard guarantees) with memory sharing/ballooning techniques, not realizing a reservation specifically must fit within physical capacity.'},
+
+{objective:'4.2',topic:'High Availability',diff:'adv',
+stem:'A virtualization administrator sets an anti-affinity rule between two VMs that are redundant instances of the same load-balanced application. What is this rule actually accomplishing?',
+opts:['Forcing both VMs to always run on the same physical host for lower latency','Ensuring the two redundant VMs never run on the same physical host, so a single host failure cannot take down both instances simultaneously','Disabling network access for both VMs','Guaranteeing both VMs are backed up nightly'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Anti-affinity rules deliberately keep specified VMs on separate physical hosts, which is exactly what redundant pairs need so that a single host outage cannot eliminate both instances of the load-balanced application at once.',
+misconception:'Technicians sometimes confuse affinity (keep together) and anti-affinity (keep apart) rules, when the whole point of anti-affinity for a redundant pair is to deliberately separate them.'},
+
+{objective:'4.3',topic:'Cloud Service Models',diff:'found',
+stem:'A development team deploys their application code to a provider that manages the servers, OS patching, and runtime entirely, leaving the team to only write and push code. Which service model is this?',
+opts:['IaaS','PaaS','SaaS','On-premises virtualization'],
+ans:1,
+rationale:'<strong>B is correct.</strong> PaaS abstracts away server and OS management so developers can focus purely on application code, while the provider manages the underlying platform, runtime, and infrastructure — distinct from IaaS, where the customer still manages the OS.',
+misconception:'Technicians sometimes confuse PaaS with IaaS since both are "infrastructure-adjacent," missing that the defining difference is whether the customer or the provider manages the OS and runtime.'},
+
+{objective:'4.3',topic:'Shared Responsibility Model',diff:'inter',
+stem:'A company deploys virtual machines on a public cloud IaaS platform. After a security incident, it is determined that the guest OS on one VM was missing months of patches. Whose responsibility was that patching, under the shared responsibility model?',
+opts:['The cloud provider\'s responsibility entirely','The customer\'s responsibility, since IaaS leaves guest OS management — including patching — to the customer while the provider manages the underlying physical infrastructure','No one\'s responsibility, since patches are optional','The responsibility transfers to the provider automatically after 90 days'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Under the shared responsibility model for IaaS, the provider manages the physical infrastructure and virtualization layer, while the customer remains responsible for everything above that layer, including guest OS patching — missed patches on a customer-managed VM are a customer-side failure, not a provider failure.',
+misconception:'Technicians and organizations sometimes assume "the cloud" handles all security and maintenance automatically, missing that the shared responsibility model explicitly leaves OS-level patching to the customer under IaaS.'},
+
+{objective:'4.4',topic:'Cloud Cost Considerations',diff:'inter',
+stem:'A company commits to a 3-year reserved cloud instance plan to get a lower hourly rate, then decommissions that workload after only 8 months. What is the typical financial consequence?',
+opts:['A full automatic refund with no penalty','The company generally forfeits most of the remaining commitment value, since the discounted rate was specifically traded for the multi-year commitment','The provider extends the contract for free','No consequence; reserved instances can be canceled anytime at no cost'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Reserved instance pricing trades a lower hourly rate specifically for a binding multi-year commitment; ending the workload early does not typically release the company from that financial commitment, which is why reservations suit stable, predictable long-term workloads rather than uncertain ones.',
+misconception:'Technicians and decision-makers sometimes treat reserved pricing as a simple discount with no downside, missing that the lower rate is compensation the provider extracts specifically in exchange for a guaranteed long-term commitment.'},
+
+{objective:'4.4',topic:'Cloud Cost Considerations',diff:'found',
+stem:'A finance team notices an unexpectedly high cloud bill driven largely by data transferred out of the cloud provider\'s network to the internet. What cost category does this represent?',
+opts:['Ingress fees','Egress fees, charged for data leaving the provider\'s network outbound','Storage-at-rest fees','Compute reservation fees'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Egress fees specifically charge for data leaving the provider\'s network outbound to the internet or another cloud; most providers charge little or nothing for inbound data (ingress) but meaningfully for outbound data, which is a commonly overlooked cost driver for data-heavy workloads.',
+misconception:'Technicians sometimes assume cloud data transfer costs are symmetric in both directions, missing that outbound (egress) traffic is typically the far more expensive direction.'},
+
+{objective:'4.5',topic:'VM Snapshots & Backups',diff:'adv',
+stem:'A VM has accumulated five unconsolidated snapshots over several months. The administrator notices disk I/O has slowed and free storage has shrunk more than expected. What explains both symptoms?',
+opts:['The VM has a hardware fault unrelated to the snapshots','Each snapshot adds a delta file tracking changes since the previous one; a long, unconsolidated chain increases storage consumption and slows disk I/O since writes must traverse the chain','Snapshots automatically compress over time, so this should not be happening','The VM\'s vCPU count silently doubled'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Each snapshot in a chain adds a delta file tracking changes since the previous snapshot; a long, unconsolidated chain both consumes growing storage and slows disk I/O because writes must traverse the entire chain, which is exactly the pattern described here.',
+misconception:'Technicians sometimes treat taking a snapshot as a "free" action with no ongoing cost, missing that an unconsolidated snapshot chain has real, worsening storage and performance costs the longer it is left in place.'},
+
+{objective:'4.5',topic:'VM Migration',diff:'found',
+stem:'An administrator needs to move a running, actively-used VM to a different physical host for scheduled maintenance, without any noticeable interruption to its users. What capability is needed?',
+opts:['A cold migration, since the VM must be powered off first','Live migration (such as vMotion or an equivalent), which transfers a running VM\'s memory and execution state to another host with minimal to no perceptible downtime','A full backup and restore cycle','Cloning the VM and deleting the original'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Live migration transfers a running VM\'s active memory and state to another host over the network while it keeps running, which is exactly what allows host maintenance without users noticing an interruption — a cold migration, by contrast, requires powering the VM off first.',
+misconception:'Technicians sometimes default to a cold migration or backup/restore approach, missing that live migration exists specifically to avoid any downtime during a host-to-host move.'},
+
+{objective:'4.1',topic:'Containers vs. VMs',diff:'inter',
+stem:'A DevOps team wants to deploy dozens of small, short-lived application instances as quickly as possible, with minimal per-instance overhead. Why would containers be preferred over full VMs for this specific need?',
+opts:['Containers include their own separate guest OS kernel, just like VMs, so there is no real difference','Containers share the host OS kernel rather than booting a full separate guest OS, so they start in seconds and consume far less overhead per instance than a comparable VM','Containers always provide stronger security isolation than VMs','Containers eliminate the need for a host operating system entirely'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Because containers share the host OS kernel instead of booting an entire separate guest OS, they start dramatically faster and with far less overhead than a comparable VM, which is exactly suited to deploying many short-lived instances quickly.',
+misconception:'Technicians sometimes reverse the relationship, assuming containers include their own kernel like VMs do; the shared-kernel model is exactly what makes containers so much lighter weight than full virtualization.'},
+
+{objective:'4.2',topic:'Storage Virtualization',diff:'adv',
+stem:'A storage administrator thin-provisions VM disks across a shared storage pool, intentionally allocating more total virtual capacity than physically exists, on the assumption that not every VM will use its full allocation at once. What operational risk does this introduce?',
+opts:['No risk; thin provisioning removes all capacity planning concerns entirely','If actual usage across VMs grows faster than expected, the shared physical pool can be exhausted, causing write failures even though individual VMs still show free space to their guest OS','Thin-provisioned disks cannot be backed up at all','VMs using thin-provisioned disks always run at half speed'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Overallocation is a calculated bet that not every VM will use its full virtual capacity simultaneously; if real usage grows faster than planned, the shared physical pool can actually run out, causing write failures even while guest OSes still report free space, since that free-space figure reflects the virtual allocation, not the physical pool.',
+misconception:'Technicians sometimes treat thin provisioning as removing the need for ongoing capacity monitoring, when it actually shifts the risk toward needing active monitoring of real physical pool consumption versus allocated virtual capacity.'},
+
+{objective:'4.3',topic:'Cloud Deployment Models',diff:'inter',
+stem:'A hospital needs to keep patient data on infrastructure it fully controls for compliance reasons, but also wants elastic cloud resources for non-sensitive workloads like its public website. Which deployment model fits both needs at once?',
+opts:['Public cloud only','Private cloud only','Hybrid cloud, combining private infrastructure for sensitive data with public cloud for other workloads','Community cloud shared with unrelated organizations'],
+ans:2,
+rationale:'<strong>C is correct.</strong> Hybrid cloud lets an organization keep regulated or sensitive workloads on private infrastructure while still using public cloud elasticity for less sensitive tasks, which is exactly the dual requirement described — private alone would satisfy compliance but not the elasticity need, and vice versa for public alone.',
+misconception:'Technicians sometimes pick "private cloud only" because of the compliance requirement, overlooking that the hospital also explicitly wants public cloud elasticity for other workloads, which only a hybrid model satisfies.'},
+
+{objective:'4.4',topic:'Cloud Cost Considerations',diff:'found',
+stem:'A batch-processing job runs overnight and can tolerate being interrupted and restarted if needed. What type of cloud instance pricing is best suited to minimize cost for this specific workload?',
+opts:['Reserved/committed-use instances for a multi-year term','Spot (preemptible) instances, which offer a steep discount in exchange for the provider being able to reclaim the capacity with little notice','On-demand pricing at full rate','A dedicated private cloud deployment'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Spot/preemptible instances use spare provider capacity at a steep discount in exchange for the possibility of reclamation with little warning, which is an acceptable tradeoff specifically for interruptible, fault-tolerant workloads like overnight batch processing.',
+misconception:'Technicians sometimes default to on-demand or reserved pricing out of caution, without recognizing that a genuinely interruptible workload is exactly the scenario spot pricing is designed to reward with a much lower cost.'},
+
+{objective:'4.5',topic:'VM Cloning',diff:'found',
+stem:'An administrator needs to deploy ten identical test VMs quickly from a single configured template. What should be used, as opposed to taking a snapshot of the template VM?',
+opts:['Cloning, which creates full independent copies that can each run separately, unlike a snapshot, which only marks a rollback point on the original VM\'s existing disk','A snapshot of the template, since snapshots can run as independent machines','A live migration of the template VM','A resource pool'],
+ans:0,
+rationale:'<strong>A is correct.</strong> Cloning produces entirely separate, independently operable VM copies, which is what rapid deployment of multiple identical test machines requires; a snapshot, by contrast, only marks a rollback point on the original VM and is not meant to run as a separate machine.',
+misconception:'Technicians sometimes use "clone" and "snapshot" interchangeably, missing that only cloning produces a genuinely separate, independently bootable VM instance suited to deploying multiples.'},
+
+{objective:'4.1',topic:'VDI',diff:'inter',
+stem:'A call center wants to replace its aging physical desktops with thin clients while centralizing patching and security management. What should be deployed on the back end to support this?',
+opts:['A single shared physical desktop for all users','VDI (Virtual Desktop Infrastructure), hosting full desktop OS instances centrally in the data center and streaming them to the thin clients','A single large spreadsheet tracking each desktop\'s patch status manually','A peer-to-peer file sharing network between desktops'],
+ans:1,
+rationale:'<strong>B is correct.</strong> VDI centralizes desktop OS instances as VMs in the data center, streamed to thin clients, which is exactly what lets IT patch, secure, and manage far more consistently than maintaining many distributed physical machines — directly matching the stated goal.',
+misconception:'Technicians sometimes think thin clients are a standalone solution needing no backend infrastructure, missing that VDI actually requires substantial server-side resources to host all those virtual desktops.'},
+
+{objective:'4.2',topic:'Virtual Networking',diff:'found',
+stem:'Two VMs on the same physical host need to communicate with each other and reach the physical network, without requiring a dedicated physical switch port for each VM. What makes this possible?',
+opts:['A physical network tap installed inside the host','A virtual switch running in the hypervisor software, connecting the VMs\' virtual NICs to each other and out to the physical network through the host\'s physical NIC','A second physical server','Disabling the host\'s firewall'],
+ans:1,
+rationale:'<strong>B is correct.</strong> A virtual switch operates in software within the hypervisor, letting VMs on the same host communicate with each other and reach the physical network through the host\'s physical NIC, without needing a dedicated physical switch port per VM.',
+misconception:'Technicians sometimes think virtual networking requires extra physical hardware per VM, missing that the virtual switch solves exactly this problem in software.'},
+
+{objective:'4.3',topic:'Cloud Service Models',diff:'adv',
+stem:'A company uses a fully managed database service where the provider handles patching, backups, and scaling of the database engine, while the company only manages schemas and queries. Which service model best fits this arrangement?',
+opts:['IaaS, since it still involves a server somewhere','A PaaS-style managed service, since the provider manages the platform (engine, patching, scaling) while the customer focuses on data and queries','SaaS, since the company never touches infrastructure','On-premises virtualization'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Managed database services sit in PaaS territory: the provider manages the platform itself (engine version, patching, scaling, backups) while the customer focuses on their own data and queries, without managing the underlying servers or database engine infrastructure directly.',
+misconception:'Technicians sometimes label any fully managed cloud service as SaaS by default, missing that SaaS specifically means a complete end-user application, not a platform service developers and administrators build on top of.'},
+
+{objective:'4.4',topic:'Cloud Cost Considerations',diff:'inter',
+stem:'A company wants to avoid being fully dependent on a single cloud provider\'s pricing and roadmap decisions, and also wants resilience if that one provider has a major outage. What strategy addresses both concerns, despite adding management complexity?',
+opts:['Consolidating everything onto the cheapest single provider available','A multi-cloud strategy, using more than one provider to avoid vendor lock-in and improve resilience against a single provider\'s outage','Moving everything back on-premises permanently','Using only free-tier cloud services'],
+ans:1,
+rationale:'<strong>B is correct.</strong> A multi-cloud strategy is typically chosen specifically for resilience against a single point of provider failure and to avoid total dependency on one vendor\'s pricing and roadmap, a tradeoff made against the real added cost of managing multiple platforms.',
+misconception:'Technicians sometimes assume multi-cloud is simply "more expensive with no upside," missing the specific resilience and vendor-lock-in mitigation benefits that motivate the added complexity.'},
+];
+
+// --- SIM DOMAIN 5: TROUBLESHOOTING & SUPPORT (28) ---
+const SIM_TROUBLESHOOTING=[
+{objective:'5.1',topic:'Troubleshooting Methodology',diff:'found',
+stem:'A technician forms a theory about why a printer won\'t print, tests it, and finds the theory is wrong. What is the correct next step per the standard troubleshooting methodology?',
+opts:['Immediately escalate without further investigation','Form a new theory based on what was just learned, and test that one','Document the incorrect theory as the final resolution','Replace the printer regardless of the actual cause'],
+ans:1,
+rationale:'<strong>B is correct.</strong> A failed theory is an expected, normal part of the diagnostic loop; the methodology calls for forming a new theory informed by what the failed test revealed and testing again, escalating only once reasonable theories are exhausted, not after the very first one fails.',
+misconception:'Technicians sometimes treat one failed theory as proof the whole process has failed, rather than recognizing that iterating theories based on new information is the expected next step.'},
+
+{objective:'5.1',topic:'Troubleshooting Methodology',diff:'inter',
+stem:'A technician fixes a workstation\'s original reported symptom quickly but moves on to the next ticket without checking anything else. What step in the standard methodology did this skip, and why does it matter?',
+opts:['Documenting the findings, which only matters for billing','Verifying full system functionality, which matters because the fix might have resolved the reported symptom while leaving a related issue unaddressed or introducing a new one','Establishing a theory of probable cause, which already happened','Gathering information, which already happened'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Confirming full system functionality — not just the disappearance of the originally reported symptom — catches cases where the fix was incomplete or introduced a side effect; skipping this step risks closing a ticket on a problem that is not actually fully resolved.',
+misconception:'Technicians sometimes treat symptom disappearance as equivalent to a confirmed fix, missing that a symptom can go away for reasons only partially related to the actual fix applied.'},
+
+{objective:'5.2',topic:'Motherboard/CPU/RAM Symptoms',diff:'found',
+stem:'A desktop powers on with fans spinning but the screen stays black, and the motherboard emits a repeating beep pattern. What should the technician check first, using the motherboard\'s documented beep codes as a guide?',
+opts:['The Wi-Fi adapter','RAM seating, since a very common cause of early beep-code failures is memory not seated properly','The printer driver','The web browser cache'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Pre-OS beep codes are a diagnostic language built into the motherboard; since the OS has not even loaded at this stage, a software-layer explanation is irrelevant — checking RAM seating against the documented beep pattern is the correct physical-layer first step.',
+misconception:'Technicians sometimes reach for OS-level or driver explanations for a symptom that occurs before the OS has even begun loading, when the beep code itself points to a specific, checkable hardware cause.'},
+
+{objective:'5.2',topic:'Motherboard/CPU/RAM Symptoms',diff:'adv',
+stem:'A desktop randomly reboots only overnight while idle, never during active daytime use, and the event logs show no application crash errors near the reboot times. What area should be investigated?',
+opts:['The keyboard driver','Scheduled tasks, Wake-on-LAN triggers, or Windows Update\'s automatic restart schedule, since a reboot pattern strictly tied to overnight idle hours with no crash evidence points to scheduled software behavior','The monitor\'s resolution setting','The mouse sensitivity setting'],
+ans:1,
+rationale:'<strong>B is correct.</strong> A reboot pattern strictly tied to overnight idle hours, with no application-level crash evidence, points toward scheduled system-level behavior — automatic update restarts, scheduled tasks, or wake-triggered events — rather than a hardware fault, which would typically also produce symptoms during active daytime use.',
+misconception:'Technicians default to hardware explanations for any reboot symptom, missing that this specific, time-bound, crash-log-free pattern is a hallmark of scheduled software behavior, not a random hardware failure.'},
+
+{objective:'5.3',topic:'Storage Symptoms',diff:'found',
+stem:'A laptop takes an unusually long time to boot, file access is slow, and Windows reports the primary drive\'s S.M.A.R.T. status as "Bad." What should the technician recommend?',
+opts:['Ignore the warning, since S.M.A.R.T. is often inaccurate','Back up all data immediately and plan for drive replacement, since a "Bad" S.M.A.R.T. status reflects the drive\'s own measured signs of physical degradation','Run a virus scan only','Increase the page file size'],
+ans:1,
+rationale:'<strong>B is correct.</strong> A status explicitly reported as "Bad" (rather than "Caution" or purely informational) reflects the drive\'s own firmware assessment based on internal failure-predictive attributes; the correct response is immediate backup and planned replacement, not workarounds that ignore the underlying hardware risk.',
+misconception:'Technicians sometimes dismiss S.M.A.R.T. warnings as generic background noise, without distinguishing an explicit "Bad" verdict from a milder informational notice.'},
+
+{objective:'5.3',topic:'Storage Symptoms',diff:'inter',
+stem:'A newly installed second hard drive does not appear in File Explorer, but it does appear correctly in the BIOS/UEFI drive list. What is the correct next troubleshooting step?',
+opts:['Replace the motherboard','Use the OS\'s disk management utility to initialize the disk and assign it a drive letter, since BIOS detection confirms the physical connection is fine','Reinstall Windows entirely','Replace the power supply'],
+ans:1,
+rationale:'<strong>B is correct.</strong> A drive visible in BIOS but absent from File Explorer typically has not yet been initialized or partitioned at the OS level; using Disk Management to complete that setup usually resolves it without any hardware replacement, since BIOS detection already rules out a connection problem.',
+misconception:'Technicians sometimes assume a drive invisible in Windows must be a hardware fault, overlooking that BIOS visibility already confirms the physical connection and isolates the issue to OS-level disk configuration.'},
+
+{objective:'5.4',topic:'Video/Display Symptoms',diff:'found',
+stem:'A monitor shows a distorted, flickering image with color artifacts, but the image briefly stabilizes whenever the video cable is physically wiggled. What does this strongly suggest?',
+opts:['A corrupted Windows registry','A loose or damaged video cable/connector, since symptoms changing with physical cable manipulation point to the physical layer','An expired antivirus subscription','Too many browser tabs open'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Symptoms that change based on physically moving the cable are a strong physical-layer signal, pointing to a loose connector, damaged cable, or failing port rather than any software-level cause, which would not respond to cable manipulation at all.',
+misconception:'Technicians sometimes reach for software explanations even when the scenario explicitly describes a symptom that changes with physical cable manipulation — a classic hardware diagnostic clue.'},
+
+{objective:'5.4',topic:'Video/Display Symptoms',diff:'adv',
+stem:'A laptop\'s external monitor displays correctly, but the built-in screen shows a dim, barely visible image even at maximum brightness. What does the working external monitor rule out, and what does it point to?',
+opts:['It rules out nothing useful','It rules out the GPU and overall video output pipeline, isolating the fault to the internal panel\'s backlight or inverter/driver circuit','It rules out the battery only','It proves the keyboard is also failing'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Since the external monitor works fine, the GPU and video pipeline are confirmed functioning, which isolates the fault to the internal panel\'s backlight system — a common laptop-specific failure point — rather than anything upstream of the display itself.',
+misconception:'Technicians sometimes blame the GPU broadly for any display issue without using a working external monitor as a diagnostic control that rules the GPU out entirely.'},
+
+{objective:'5.5',topic:'Network Connectivity Symptoms',diff:'inter',
+stem:'A laptop shows full Wi-Fi signal strength, but its IP address configuration shows 169.254.x.x. What does this address range indicate, and does the full signal strength contradict it?',
+opts:['A properly assigned static IP; the signal strength confirms everything is working','An APIPA address, meaning DHCP failed to respond, which signal strength does not contradict since it only measures the radio link, not whether IP addressing succeeded','A successful VPN connection','A properly configured DNS server'],
+ans:1,
+rationale:'<strong>B is correct.</strong> The 169.254.0.0/16 range is Automatic Private IP Addressing, self-assigned when DHCP fails to respond; full signal strength only reflects radio link quality and does not guarantee the separate DHCP handshake succeeded, so the two observations are fully consistent, not contradictory.',
+misconception:'Technicians sometimes equate "full signal bars" with "fully working network," missing that signal strength and successful IP addressing are two entirely separate layers that can fail independently.'},
+
+{objective:'5.5',topic:'Network Connectivity Symptoms',diff:'adv',
+stem:'Several users on one specific office switch report intermittent disconnections, while users on a different switch are unaffected. Cabling on the affected switch\'s uplink was redone recently. What should be checked first?',
+opts:['Every individual user\'s antivirus software','The uplink cable termination and switch port for a marginal or failing physical connection introduced during the recent cabling work','The DNS server\'s hostname','The users\' monitor resolution settings'],
+ans:1,
+rationale:'<strong>B is correct.</strong> The symptom is isolated to users on one specific switch, correlated with recent physical cabling work on that switch\'s uplink — this points directly to a physical-layer problem introduced by that recent change, rather than a per-user software issue.',
+misconception:'Technicians sometimes chase individual-user explanations when a pattern shared by everyone on one specific switch, following a specific recent physical change, clearly points to a shared physical-layer cause.'},
+
+{objective:'5.6',topic:'Mobile Device Troubleshooting',diff:'found',
+stem:'A phone\'s battery drains unusually fast and the phone feels warm even when idle. What should the technician check first, before considering a factory reset or hardware replacement?',
+opts:['Immediately replace the phone','Battery usage statistics in settings, to identify a specific app consuming excessive background resources before escalating to a reset or replacement','Factory reset without any further diagnosis','Ignore it — this is always normal'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Built-in battery usage statistics can pinpoint a specific misbehaving app (stuck in a wake lock or background loop) before resorting to a full reset or hardware replacement, which are far more disruptive steps than simply checking the built-in diagnostic first.',
+misconception:'Technicians sometimes jump to drastic remedies before using the built-in diagnostic tools that can identify a much simpler, targeted cause.'},
+
+{objective:'5.6',topic:'Mobile Device Troubleshooting',diff:'inter',
+stem:'A phone\'s touchscreen registers phantom touches in one specific corner of the display after a minor drop. What does the localized, drop-correlated nature of the symptom point to?',
+opts:['The battery needing a charge','Physical damage to the digitizer layer in that specific area, since the symptom is both localized and tied to a physical impact event','The Wi-Fi antenna being disconnected','The SIM card being inserted incorrectly'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Phantom or erratic touches localized to one specific screen area, correlated with a physical drop, strongly point to digitizer damage in that region, since the digitizer is the touch-sensing layer that is physically susceptible to impact damage.',
+misconception:'Technicians sometimes look for software-based causes for a symptom that is both localized to one area and correlated with a specific physical event, both of which point to a hardware fault instead.'},
+
+{objective:'5.7',topic:'Printer Troubleshooting',diff:'found',
+stem:'A network printer shows "offline" in the print queue on one specific user\'s PC, but other users on the same network print to it fine. What should be checked first on the affected PC?',
+opts:['The printer\'s toner level','Whether the printer\'s configured IP address on that PC still matches the printer\'s actual current IP address, since other users printing fine rules out the printer itself','The printer\'s physical power cable','The office\'s internet connection'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Since other users print successfully, the printer itself is confirmed functioning; the issue is isolated to this one PC\'s configuration, and a stale or incorrect IP address is a very common cause of a single workstation losing connectivity to a shared network printer.',
+misconception:'Technicians sometimes investigate the printer hardware itself despite the scenario explicitly stating other users print fine, which should redirect the investigation to the one affected PC instead.'},
+
+{objective:'5.1',topic:'Troubleshooting Methodology',diff:'inter',
+stem:'A technician is troubleshooting a "no display" issue and is weighing several possible causes: a bad monitor, bad cable, bad GPU, or bad RAM. What is the most efficient order to test these?',
+opts:['Replace all four components at once to save time','Test the cheapest, fastest, most probable causes first — such as swapping in a known-good monitor or cable — before moving to more invasive or costly tests like a GPU or RAM swap','Escalate to a senior technician immediately without any testing','Reinstall the operating system first, regardless of the symptom'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Efficient troubleshooting tests the most probable and easiest-to-check causes first, since a spare monitor or cable swap takes seconds, before moving to more invasive or time-consuming component-level tests like GPU or RAM diagnostics.',
+misconception:'Technicians sometimes treat all possible causes as equally worth testing in arbitrary order, rather than applying the practical principle of ruling out cheap, likely causes before expensive or time-consuming ones.'},
+
+{objective:'5.2',topic:'Motherboard/CPU/RAM Symptoms',diff:'inter',
+stem:'A desktop that previously ran fine fails to boot after a user adds extra RAM purchased separately from the original kit. What diagnostic step should come before assuming a dead motherboard?',
+opts:['Immediately replace the motherboard','Remove the newly added RAM and test with only the original kit installed, to isolate whether the new sticks themselves are the cause of the instability','Replace the power supply','Reinstall the operating system'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Removing the newly added RAM and testing with just the original kit isolates whether the new sticks are the actual cause of instability — a simple, reversible test that should come well before assuming a far more serious and expensive motherboard failure.',
+misconception:'Technicians sometimes escalate to replacing major components before performing the simple, reversible test of removing the most recently changed variable.'},
+
+{objective:'5.3',topic:'Storage Symptoms',diff:'adv',
+stem:'A RAID 5 array reports one drive has failed, and while running in a degraded state, a second drive begins showing read errors. What is the correct urgency level, and why?',
+opts:['No urgency; RAID 5 tolerates any number of simultaneous failures','High urgency, since RAID 5 only tolerates a single drive failure at a time, and a second failing drive while already degraded risks complete data loss for the entire array','This only matters if the server is powered off','The array will repair itself automatically with no action needed'],
+ans:1,
+rationale:'<strong>B is correct.</strong> RAID 5 provides single-drive fault tolerance via distributed parity; with the array already degraded from one failure, a second drive developing errors puts the entire array\'s data at serious, immediate risk, demanding urgent backup and remediation rather than a wait-and-see approach.',
+misconception:'Technicians sometimes assume "RAID" broadly implies protection against multiple simultaneous failures, forgetting that RAID 5 specifically tolerates only one failure at a time.'},
+
+{objective:'5.4',topic:'Video/Display Symptoms',diff:'inter',
+stem:'After a graphics driver update, a desktop shows severe artifacting and occasional black screens only under 3D load, but works fine on the desktop and in a browser. What should be tried first, and why?',
+opts:['Replace the monitor','Roll back or clean-reinstall the graphics driver, since the timing correlates directly with the update and the failure occurs specifically under the driver\'s most demanding code path','Replace the power supply','Reinstall the operating system entirely'],
+ans:1,
+rationale:'<strong>B is correct.</strong> The symptom onset correlating precisely with a driver update, combined with the fault appearing specifically under 3D load, points strongly to the new driver itself; rolling back or performing a clean reinstall is the appropriate first, least invasive step before considering hardware.',
+misconception:'Technicians sometimes jump to full OS reinstalls or hardware replacement, overlooking that the timing correlation with a specific recent software change is the strongest diagnostic clue in the scenario.'},
+
+{objective:'5.5',topic:'Network Connectivity Symptoms',diff:'found',
+stem:'A user cannot access any website by name, but can reach the same sites successfully by typing the raw IP address directly into the browser. What service is most likely at fault?',
+opts:['DHCP','DNS, since successful access by IP but failure by name isolates the problem specifically to name resolution','The physical Ethernet cable','The monitor'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Successful access by IP address but failure by name isolates the problem specifically to DNS (name resolution); the underlying network path and connectivity are clearly functional since the raw IP connection succeeds.',
+misconception:'Technicians sometimes suspect DHCP (address assignment) rather than DNS, even though a client with no valid IP address at all would be unable to reach anything, by name or by IP — the scenario\'s detail rules DHCP out.'},
+
+{objective:'5.6',topic:'Mobile Device Troubleshooting',diff:'adv',
+stem:'A tablet will not charge with several different cables and chargers that all work fine on other devices, but briefly shows a charging icon if the cable is held at a specific angle. What does ruling out the cables and chargers point to?',
+opts:['The battery being fully depleted permanently','A damaged or debris-filled charging port causing an inconsistent physical connection, since cables/chargers are already ruled out and the angle-dependence points to the port itself','The tablet needing a software update','The Wi-Fi radio interfering with charging'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Ruling out cables and chargers (since they work fine on other devices) isolates the fault to the tablet\'s port itself; charging only at a specific physical angle is a classic sign of a damaged connector or debris partially blocking a stable connection, not a software or battery issue.',
+misconception:'Technicians sometimes look for battery or software causes despite the scenario\'s explicit angle-dependent behavior, which is a strong physical/mechanical signal pointing to the port connection itself.'},
+
+{objective:'5.7',topic:'Printer Troubleshooting',diff:'found',
+stem:'A print job is stuck in the queue and will not print or cancel through the normal interface. What is the standard troubleshooting step to clear this?',
+opts:['Reinstall the entire operating system','Restart the Print Spooler service, and clear the spool folder if the stuck job persists','Replace the printer\'s toner cartridge','Change the printer\'s IP address at random'],
+ans:1,
+rationale:'<strong>B is correct.</strong> The Print Spooler is the service managing the print queue; restarting it, and clearing any corrupted job files in the spool folder if needed, is the standard, well-documented fix for a stuck job that will not print or cancel through the normal queue interface.',
+misconception:'Technicians sometimes reach for drastic measures like a full OS reinstall for a narrowly scoped service issue that has a much simpler, targeted standard fix.'},
+
+{objective:'5.1',topic:'Troubleshooting Methodology',diff:'found',
+stem:'A technician receives a vague trouble report: "the computer is being weird." What is the best next step before forming any theory of probable cause?',
+opts:['Immediately reinstall the operating system based on the vague description','Ask targeted, specific questions to gather concrete symptoms — when it started, what changed, what exactly happens — before forming a theory','Tell the user to figure it out themselves','Replace random hardware components until something changes'],
+ans:1,
+rationale:'<strong>B is correct.</strong> The identify-the-problem step of the methodology explicitly includes gathering concrete, specific information from the user before forming any theory; acting on a vague description or guessing through random component replacement skips this foundational step entirely.',
+misconception:'Technicians sometimes skip past information-gathering when a report is vague, jumping straight to a drastic action rather than first clarifying the actual symptoms through targeted questioning.'},
+
+{objective:'5.2',topic:'Motherboard/CPU/RAM Symptoms',diff:'found',
+stem:'A desktop fails to boot, and the motherboard\'s onboard diagnostic LED display shows a code corresponding to "CPU error" per the manual. What is the appropriate first step, given that CPUs rarely fail outright?',
+opts:['Replace the monitor','Reseat the CPU in its socket and visually inspect for bent pins on applicable socket types, before assuming the CPU itself has failed','Reinstall the operating system','Replace the case fans'],
+ans:1,
+rationale:'<strong>B is correct.</strong> A CPU-related diagnostic code often stems from a seating issue or bent socket pins rather than an outright failed CPU; reseating and visually inspecting is the appropriate first, non-destructive, and far cheaper step before assuming the CPU itself needs replacement.',
+misconception:'Technicians sometimes interpret any component-specific diagnostic code as proof that component has failed outright, missing that seating or installation issues are a common and much cheaper first explanation to rule out.'},
+
+{objective:'5.3',topic:'Storage Symptoms',diff:'inter',
+stem:'A user reports files randomly becoming corrupted on their internal hard drive, and Windows periodically prompts to run a disk check on startup. What tool is designed to scan for and repair this specific type of issue?',
+opts:['Disk Defragmenter only','chkdsk (Check Disk), which scans the file system and optionally the physical disk surface for errors','Task Manager','Device Manager'],
+ans:1,
+rationale:'<strong>B is correct.</strong> chkdsk scans the file system and, optionally, the physical disk surface for errors, attempting to repair file system inconsistencies and mark bad sectors — the standard tool for this specific pattern of file corruption and OS-prompted disk checks, distinct from defragmentation.',
+misconception:'Technicians sometimes confuse chkdsk with Disk Defragmenter; defragmentation reorganizes file placement for performance, while chkdsk specifically checks and repairs file system integrity issues.'},
+
+{objective:'5.5',topic:'Network Connectivity Symptoms',diff:'adv',
+stem:'A user can access internal resources by IP address but not by their internal hostname, even while connected to the office network. External internet browsing by name works fine. What does this specific pattern isolate the problem to?',
+opts:['The user\'s external internet connection','The internal DNS configuration, since external name resolution works but internal name resolution specifically fails','The office\'s physical cabling','The user\'s monitor settings'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Since external DNS resolution works fine but internal hostname resolution specifically fails, the issue is isolated to the internal DNS configuration — either the client pointed at the wrong DNS server, or a problem with the internal DNS zone/record itself — rather than any broader connectivity issue.',
+misconception:'Technicians sometimes treat all "cannot resolve a name" symptoms as identical, missing that this scenario specifically isolates the fault to internal name resolution alone, which points directly at internal DNS configuration.'},
+
+{objective:'5.6',topic:'Mobile Device Troubleshooting',diff:'inter',
+stem:'A phone repeatedly fails partway through an OS update, showing an error each time. What should be ruled out before assuming a hardware failure?',
+opts:['Immediately replace the phone','Insufficient free storage space and an unstable network connection, both of which are common and easily fixable causes of a failed update, before escalating to hardware','Remove the SIM card permanently','Disable the touchscreen'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Failed OS updates are frequently caused by insufficient free storage space needed for the update package or an unstable connection interrupting the download; both should be ruled out and corrected before assuming a deeper hardware problem.',
+misconception:'Technicians sometimes jump to hardware failure for a software installation error without first ruling out the two most common, easily fixable causes: storage space and connection stability.'},
+
+{objective:'5.7',topic:'Printer Troubleshooting',diff:'inter',
+stem:'A multifunction printer prints normally but scanned documents configured for "scan to email" never arrive at the destination inbox. What area should be checked first, given that printing itself works?',
+opts:['The printer\'s toner level, since scanning also uses toner','The scan-to-email feature\'s own SMTP server settings configured on the printer, since this is a separate configuration from the print function entirely','The paper tray size setting','The printer\'s physical power cable'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Scan-to-email relies on its own SMTP configuration on the printer, entirely separate from the print pipeline; since printing works fine, the fault is isolated to that specific email-delivery configuration, not the printer\'s general hardware.',
+misconception:'Technicians sometimes treat "the printer" as one monolithic system where any failure implicates general hardware, missing that scan-to-email is a functionally separate subsystem with its own configuration to check.'},
+
+{objective:'5.1',topic:'Troubleshooting Methodology',diff:'adv',
+stem:'A technician resolves an outage but the fix was applied under time pressure without documenting the steps taken. A similar outage recurs three months later with a different technician on call. What does the missing documentation cost the team?',
+opts:['Nothing; documentation is purely administrative','The second technician has to rediscover the cause and fix from scratch, losing time that would have been saved had the first resolution been documented for future reference','It only affects billing accuracy','It has no effect since the first technician remembers the fix personally'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Documentation exists specifically so that a different technician facing a similar issue later does not have to rediscover the cause and fix from scratch; skipping it under time pressure trades a short-term time save for a larger, recurring cost whenever the issue resurfaces.',
+misconception:'Technicians under time pressure sometimes treat documentation as optional paperwork with no real operational cost, rather than recognizing it as the mechanism that prevents future technicians from re-solving the same problem from zero.'},
+
+{objective:'5.2',topic:'Motherboard/CPU/RAM Symptoms',diff:'adv',
+stem:'A workstation shows random application crashes and occasional blue screens with varying error codes, but passes a quick RAM diagnostic test. What should be tried next before ruling memory out entirely?',
+opts:['Assume RAM is fully cleared and stop investigating memory','Run an extended, multi-pass memory diagnostic over a longer duration, since quick tests can miss intermittent memory errors that only surface under sustained testing','Replace the monitor','Reinstall whichever single application crashed most recently'],
+ans:1,
+rationale:'<strong>B is correct.</strong> Quick memory diagnostic passes can miss intermittent faults that only surface under more extensive testing; varying, seemingly random crash symptoms across different applications are a classic pattern warranting a more thorough memory test before ruling RAM out entirely.',
+misconception:'Technicians sometimes treat a single quick diagnostic pass as conclusive, missing that intermittent hardware faults often require more extensive testing to reliably surface.'},
+];
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
 // STUDY GUIDE DATA
 // ═══════════════════════════════════════════════════════════════════
 const STUDY_GUIDE={
@@ -2646,6 +3544,181 @@ function go(d){
 
 buildSectionNav();
 render();
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// SIMULATIONS ENGINE — parallel scoring/rendering namespace, mirrors the
+// Practice Questions engine above but is fully independent (separate
+// state, separate DOM targets) so answering a simulation never touches
+// Practice Questions scores and vice versa.
+// ═══════════════════════════════════════════════════════════════════
+const SIM_ALL={mobile:SIM_MOBILE, net:SIM_NETWORKING, hw:SIM_HARDWARE, virt:SIM_VIRTUALIZATION, tshoot:SIM_TROUBLESHOOTING};
+const SIM_STATE={mobile:{}, net:{}, hw:{}, virt:{}, tshoot:{}};
+const SIM_SELS={mobile:{}, net:{}, hw:{}, virt:{}, tshoot:{}};
+let curSimSec='mobile', curSimQ=0;
+
+function calcSimSection(key){
+  const qs=SIM_ALL[key], st=SIM_STATE[key];
+  let done=0,right=0;
+  qs.forEach((_,i)=>{if(st[i]!==undefined){done++;if(st[i])right++;}});
+  return{done,right,total:qs.length};
+}
+function updateSimScore(){
+  let tot=0,right=0,done=0;
+  Object.keys(SIM_ALL).forEach(k=>{const r=calcSimSection(k);tot+=r.total;done+=r.done;right+=r.right;});
+  const pct=done>0?Math.round(right/tot*100):null;
+  document.getElementById('sim-sc-tot').innerHTML=done+'<span style="font-size:13px;color:#9b9b97">/'+tot+'</span>';
+  document.getElementById('sim-sc-right').textContent=right;
+  document.getElementById('sim-sc-wrong').textContent=done-right;
+  document.getElementById('sim-sc-pct').textContent=pct!==null?pct+'%':'—';
+  const passing=pct!==null&&pct>=75;
+  document.getElementById('sim-sc-pass').textContent=pct===null?'—':passing?'Yes ✓':'Not yet';
+  document.getElementById('sim-sc-pass').style.color=pct===null?'#9b9b97':passing?'#1D9E75':'#A32D2D';
+  document.getElementById('sim-prog').style.width=(tot>0?(done/tot*100):0)+'%';
+  document.getElementById('sim-prog-txt').textContent=done+' of '+tot+' answered';
+  document.getElementById('sim-pass-note').textContent=passing?'On track to pass (675/900 ≈ 75%)':'';
+  updateSimSumCards();
+  updateSimBreakdown();
+  buildSimTabs();
+}
+function updateSimSumCards(){
+  const grid=document.getElementById('sim-sum-grid');
+  grid.innerHTML='';
+  DOMAINS.forEach(d=>{
+    const r=calcSimSection(d.key);
+    const pct=r.done>0?Math.round(r.right/r.total*100):null;
+    const passing=pct!==null&&pct>=75;
+    const card=document.createElement('div');
+    card.className='sum-card';
+    card.onclick=()=>switchSimSection(d.key);
+    card.innerHTML=`<div class="sum-title">${d.label}</div>
+      <div class="sum-num" style="color:${pct===null?'#1a1a1a':passing?'#1D9E75':'#A32D2D'}">${pct!==null?pct+'%':'—'}</div>
+      <div class="sum-sub">${r.done}/${r.total} answered</div>`;
+    grid.appendChild(card);
+  });
+}
+function updateSimBreakdown(){
+  const rows=document.getElementById('sim-bd-rows');
+  rows.innerHTML='';
+  const cats=[
+    {label:'Mobile Devices',filter:(k,q)=>k==='mobile',color:'#0F6E56'},
+    {label:'Networking',filter:(k,q)=>k==='net',color:'#185FA5'},
+    {label:'Hardware',filter:(k,q)=>k==='hw',color:'#534AB7'},
+    {label:'Virtualization & Cloud',filter:(k,q)=>k==='virt',color:'#A32D6E'},
+    {label:'Troubleshooting',filter:(k,q)=>k==='tshoot',color:'#633806'},
+    {label:'Foundational',filter:(k,q)=>q.diff==='found',color:'#3B6D11'},
+    {label:'Intermediate',filter:(k,q)=>q.diff==='inter',color:'#854F0B'},
+    {label:'Advanced',filter:(k,q)=>q.diff==='adv',color:'#A32D2D'},
+  ];
+  cats.forEach(cat=>{
+    let right=0,done=0,total=0;
+    Object.keys(SIM_ALL).forEach(k=>{
+      SIM_ALL[k].forEach((q,i)=>{
+        if(cat.filter(k,q)){total++;if(SIM_STATE[k][i]!==undefined){done++;if(SIM_STATE[k][i])right++;}}
+      });
+    });
+    const pct=done>0?Math.round(right/total*100):0;
+    rows.innerHTML+=`<div class="bd-row">
+      <span class="bd-label">${cat.label}</span>
+      <div class="bd-bar-wrap"><div class="bd-bar" style="width:${pct}%;background:${cat.color}"></div></div>
+      <span class="bd-pct">${done>0?pct+'%':'—'}</span>
+      <span class="bd-score">${right}/${total}</span>
+    </div>`;
+  });
+}
+function buildSimSectionNav(){
+  const row=document.getElementById('sim-sec-row');
+  row.innerHTML='';
+  DOMAINS.forEach(d=>{
+    const r=calcSimSection(d.key);
+    const pct=r.done>0?Math.round(r.right/r.total*100):null;
+    const b=document.createElement('button');
+    b.className='sec-btn'+(curSimSec===d.key?' active':'');
+    b.innerHTML=d.label+'<span class="sec-count">'+(pct!==null?pct+'%':r.total+'q')+'</span>';
+    b.onclick=()=>switchSimSection(d.key);
+    row.appendChild(b);
+  });
+}
+function switchSimSection(key){
+  curSimSec=key; curSimQ=0;
+  buildSimSectionNav();
+  renderSim();
+}
+function buildSimTabs(){
+  const row=document.getElementById('sim-tabs');
+  row.innerHTML='';
+  const qs=SIM_ALL[curSimSec], st=SIM_STATE[curSimSec];
+  qs.forEach((q,i)=>{
+    const b=document.createElement('button');
+    let cls='t-btn'+(i===curSimQ?' active':'');
+    if(st[i]===true)cls+=' correct';
+    else if(st[i]===false)cls+=' wrong';
+    b.className=cls;
+    b.textContent='Q'+(i+1);
+    b.onclick=()=>{curSimQ=i;renderSim();};
+    row.appendChild(b);
+  });
+}
+function renderSim(){
+  buildSimSectionNav();
+  buildSimTabs();
+  const qs=SIM_ALL[curSimSec], q=qs[curSimQ];
+  const st=SIM_STATE[curSimSec], done=st[curSimQ]!==undefined, correct=st[curSimQ]===true;
+  const diffMap={found:'Foundational',inter:'Intermediate',adv:'Advanced'};
+  const diffCls={found:'d-found',inter:'d-inter',adv:'d-adv'};
+  const domMeta=DOMAINS.find(d=>d.key===curSimSec);
+
+  let h=`<div class="q-card">
+    <div class="q-meta">
+      <span class="pill ${domMeta.pill}">${q.objective}</span>
+      <span class="diff-badge ${diffCls[q.diff]}">${diffMap[q.diff]}</span>
+      <span class="pill p-gen">${esc(q.topic)}</span>
+      <span class="q-num">Scenario ${curSimQ+1} of ${qs.length}</span>
+    </div>
+    <div class="q-stem">${fmtStem(q.stem)}</div>
+    <div class="opt-list">`;
+  const letters=['A','B','C','D'];
+  q.opts.forEach((opt,oi)=>{
+    let cls='opt-btn';
+    if(done){if(oi===q.ans)cls+=' reveal-correct';else if(SIM_SELS[curSimSec][curSimQ]===oi)cls+=' selected-wrong';}
+    const dispOpt=fmtStem(String(opt));
+    h+=`<button class="${cls}" ${done?'disabled':''} onclick="pickSimMC(${oi})"><strong>${letters[oi]}.</strong> ${dispOpt}</button>`;
+  });
+  h+=`</div>`;
+  if(done){
+    h+=`<div class="feedback ${correct?'fb-c':'fb-w'}">
+      <strong>${correct?'&#10003; Correct':'&#10007; Incorrect'}</strong> — ${q.rationale}
+      ${q.misconception?`<div class="misconception">Instructor note: ${q.misconception}</div>`:''}
+    </div>`;
+  }
+  h+=`</div>`;
+  document.getElementById('sim-qview').innerHTML=h;
+  document.getElementById('sim-q-label').textContent='Simulations — '+domMeta.label;
+  updateSimScore();
+}
+function pickSimMC(oi){
+  const q=SIM_ALL[curSimSec][curSimQ];
+  if(SIM_STATE[curSimSec][curSimQ]!==undefined) return;
+  SIM_SELS[curSimSec][curSimQ]=oi;
+  SIM_STATE[curSimSec][curSimQ]=oi===q.ans;
+  renderSim();
+}
+function goSim(d){
+  const max=SIM_ALL[curSimSec].length-1;
+  curSimQ=Math.max(0,Math.min(max,curSimQ+d));
+  renderSim();
+}
+
+(function validateSim(){
+  Object.keys(SIM_ALL).forEach(k=>{
+    SIM_ALL[k].forEach((q,i)=>{
+      if(!q.opts||q.opts.length!==4) console.error('SIM',k,i,'does not have exactly 4 options');
+      if(q.ans<0||q.ans>3) console.error('SIM',k,i,'answer index out of bounds');
+      if(!q.rationale||!q.stem) console.error('SIM',k,i,'missing required field');
+    });
+  });
+})();
 </script>
 
 </body>
